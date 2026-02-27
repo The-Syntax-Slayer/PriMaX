@@ -47,16 +47,21 @@ export default function Navbar() {
                     whileHover={{ scale: 1.05 }}
                     style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}
                 >
+                    {/* Premium Logo Icon */}
                     <div style={{
-                        width: 38, height: 38, borderRadius: 10,
-                        background: 'linear-gradient(135deg, #7c3aed, #00f5ff)',
+                        width: 40, height: 40, borderRadius: 12,
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #00e5ff 100%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: '0 0 20px rgba(124,58,237,0.6)',
+                        boxShadow: '0 0 24px rgba(124,58,237,0.7), inset 0 1px 0 rgba(255,255,255,0.2)',
+                        position: 'relative', overflow: 'hidden',
+                        flexShrink: 0,
                     }}>
-                        <FiActivity size={20} color="white" />
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)' }} />
+                        <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 14, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', position: 'relative', zIndex: 1 }}>PX</span>
                     </div>
-                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 16, fontWeight: 700, color: '#f0f0ff' }}>
-                        PriMaX<span style={{ color: '#00f5ff' }}>Hub</span>
+                    {/* Brand Name */}
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 15, fontWeight: 800, letterSpacing: '0.02em', lineHeight: 1 }}>
+                        <span style={{ background: 'linear-gradient(135deg, #c4b5fd, #f0f0ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PriMaX</span><span style={{ color: '#00e5ff', WebkitTextFillColor: '#00e5ff', WebkitBackgroundClip: 'unset' }}> Hub</span>
                     </span>
                 </motion.a>
 

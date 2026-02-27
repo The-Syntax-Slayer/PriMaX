@@ -93,14 +93,16 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
             {/* Header */}
             <div className="sidebar-header">
-                <motion.div
-                    className="sidebar-logo-icon"
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.92 }}
-                    style={{ cursor: 'pointer' }}
-                >
-                    ⚡
-                </motion.div>
+                <div style={{
+                    width: 36, height: 36, borderRadius: 10,
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #00e5ff 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 0 20px rgba(124,58,237,0.6), inset 0 1px 0 rgba(255,255,255,0.2)',
+                    position: 'relative', overflow: 'hidden', flexShrink: 0, cursor: 'pointer',
+                }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)' }} />
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 12, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', position: 'relative', zIndex: 1 }}>PX</span>
+                </div>
                 <AnimatePresence>
                     {!collapsed && (
                         <motion.span
@@ -110,7 +112,10 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                             exit={{ opacity: 0, x: -10 }}
                             transition={{ duration: 0.22 }}
                         >
-                            PriMaX<span>Hub</span>
+                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 14, fontWeight: 800, letterSpacing: '0.04em', lineHeight: 1 }}>
+                                <span style={{ background: 'linear-gradient(135deg, #c4b5fd, #f0f0ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PriMaX</span>
+                                <span style={{ color: '#00e5ff' }}> Hub</span>
+                            </span>
                         </motion.span>
                     )}
                 </AnimatePresence>

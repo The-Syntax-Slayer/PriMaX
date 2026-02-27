@@ -1,25 +1,25 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { FiArrowRight, FiPlay, FiZap, FiTrendingUp, FiAward, FiTarget } from 'react-icons/fi';
+import { FiArrowRight, FiZap, FiTrendingUp, FiAward, FiTarget, FiActivity, FiBarChart2 } from 'react-icons/fi';
 import ParticleCanvas from './ParticleCanvas';
-
-const floatingBadges = [
-    { icon: '🧠', label: 'AI-Powered Growth', x: '1.5%', y: '30%', delay: 0, color: '#7c3aed' },
-    { icon: '📈', label: '+340% Productivity', x: '80%', y: '18%', delay: 0.4, color: '#00e5ff' },
-    { icon: '✨', label: '10M+ Goals Achieved', x: '80%', y: '60%', delay: 0.8, color: '#e879f9' },
-    { icon: '🎯', label: '98% Success Rate', x: '1.5%', y: '62%', delay: 0.6, color: '#fbbf24' },
-];
 
 const statRings = [
     { label: 'Productivity Boost', value: '+340%', color: '#00e5ff' },
     { label: 'Goals Completed', value: '10M+', color: '#7c3aed' },
-    { label: 'User Rating', value: '4.9★', color: '#fbbf24' },
+    { label: 'User Rating', value: '4.9\u2605', color: '#fbbf24' },
+];
+
+const previewModules = [
+    { icon: <FiZap size={14} />, label: 'Productivity', value: '94%', color: '#00e5ff', bar: 94 },
+    { icon: <FiTrendingUp size={14} />, label: 'Finance', value: '\u20B982,400', color: '#10b981', bar: 72 },
+    { icon: <FiActivity size={14} />, label: 'Fitness', value: '18d streak', color: '#e879f9', bar: 86 },
+    { icon: <FiBarChart2 size={14} />, label: 'Career Growth', value: '\u2191 +24pts', color: '#fbbf24', bar: 68 },
 ];
 
 export default function Hero() {
     const ref = useRef(null);
     const { scrollY } = useScroll();
-    const y = useTransform(scrollY, [0, 600], [0, -120]);
+    const y = useTransform(scrollY, [0, 600], [0, -80]);
     const opacity = useTransform(scrollY, [0, 400], [1, 0]);
 
     return (
@@ -35,257 +35,250 @@ export default function Hero() {
                 background: 'linear-gradient(135deg, #03030f 0%, #0a0318 40%, #001820 100%)',
             }}
         >
-            {/* ── HEAVY PARTICLE NETWORK ── */}
-            <ParticleCanvas
-                count={120}
-                networking={true}
-                color="#7c3aed"
-                accent="#00e5ff"
-                speed={0.6}
-                maxDist={160}
-                size={2}
-                opacity={0.9}
-            />
+            <ParticleCanvas count={100} networking={true} color="#7c3aed" accent="#00e5ff" speed={0.5} maxDist={140} size={1.5} opacity={0.8} />
 
-            {/* ── GRID OVERLAY ── */}
-            <div style={{
-                position: 'absolute', inset: 0, pointerEvents: 'none',
-                backgroundImage: 'linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px)',
-                backgroundSize: '72px 72px',
-            }} />
+            {/* Grid overlay */}
+            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', backgroundImage: 'linear-gradient(rgba(124,58,237,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,58,237,0.04) 1px, transparent 1px)', backgroundSize: '72px 72px' }} />
 
-            {/* ── ANIMATED GLOW ORBS ── */}
-            <motion.div
-                animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.18, 0.12] }}
-                transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ position: 'absolute', width: 700, height: 700, borderRadius: '50%', background: '#7c3aed', filter: 'blur(120px)', top: '-20%', left: '-20%', pointerEvents: 'none' }}
-            />
-            <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.14, 0.08] }}
-                transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-                style={{ position: 'absolute', width: 600, height: 600, borderRadius: '50%', background: '#00e5ff', filter: 'blur(120px)', bottom: '-15%', right: '-15%', pointerEvents: 'none' }}
-            />
-            <motion.div
-                animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
-                transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 6 }}
-                style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: '#e879f9', filter: 'blur(100px)', top: '30%', left: '50%', opacity: 0.07, pointerEvents: 'none' }}
-            />
+            {/* Glow orbs */}
+            <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.12, 0.18, 0.12] }} transition={{ duration: 10, repeat: Infinity }} style={{ position: 'absolute', width: 700, height: 700, borderRadius: '50%', background: '#7c3aed', filter: 'blur(120px)', top: '-20%', left: '-20%', pointerEvents: 'none' }} />
+            <motion.div animate={{ scale: [1, 1.1, 1], opacity: [0.08, 0.14, 0.08] }} transition={{ duration: 14, repeat: Infinity, delay: 3 }} style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: '#00e5ff', filter: 'blur(120px)', bottom: '-10%', right: '-10%', pointerEvents: 'none' }} />
 
-            {/* ── SCAN LINE ── */}
+            {/* Scan line */}
             <motion.div
-                style={{ position: 'absolute', left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.5), rgba(124,58,237,0.3), transparent)', pointerEvents: 'none', zIndex: 1 }}
+                style={{ position: 'absolute', left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, transparent, rgba(0,229,255,0.4), rgba(124,58,237,0.25), transparent)', pointerEvents: 'none', zIndex: 1 }}
                 animate={{ top: ['-5%', '110%'] }}
                 transition={{ duration: 8, ease: 'linear', repeat: Infinity, repeatDelay: 5 }}
             />
 
-            {/* ── FLOATING BADGES ── */}
-            {floatingBadges.map((b, i) => (
-                <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.7, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: 1.4 + b.delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ position: 'absolute', left: b.x, top: b.y, zIndex: 1, pointerEvents: 'none' }}
-                    className="hero-badge-wrapper"
-                >
-                    <motion.div
-                        animate={{ y: [0, -10, 0], rotate: [0, 1, -1, 0] }}
-                        transition={{ duration: 5 + i * 1.2, ease: 'easeInOut', repeat: Infinity, delay: i * 0.7 }}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: 9,
-                            padding: '10px 18px',
-                            background: 'rgba(6, 6, 24, 0.75)',
-                            backdropFilter: 'blur(20px)',
-                            border: `1px solid ${b.color}35`,
-                            borderRadius: 100,
-                            fontSize: 13, fontWeight: 700, color: '#eeeeff',
-                            whiteSpace: 'nowrap',
-                            boxShadow: `0 0 20px ${b.color}25, 0 4px 20px rgba(0,0,0,0.4)`,
-                        }}
-                    >
-                        <span style={{ fontSize: 16 }}>{b.icon}</span>
-                        <span>{b.label}</span>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: b.color, boxShadow: `0 0 8px ${b.color}` }} />
-                    </motion.div>
-                </motion.div>
-            ))}
-
-            {/* ── MAIN CONTENT ── */}
+            {/* ── TWO-COLUMN LAYOUT ── */}
             <motion.div style={{ y, opacity, position: 'relative', zIndex: 2, width: '100%' }}>
-                <div className="container" style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '0 clamp(80px, 20vw, 240px)' }}>
+                <div className="hero-grid">
 
-                    {/* Badge */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ marginBottom: 32 }}
-                    >
-                        <motion.span
-                            className="section-tag"
-                            animate={{ boxShadow: ['0 0 0px rgba(0,229,255,0)', '0 0 20px rgba(0,229,255,0.3)', '0 0 0px rgba(0,229,255,0)'] }}
-                            transition={{ duration: 3, repeat: Infinity }}
-                            style={{ fontSize: 12, padding: '8px 22px' }}
-                        >
-                            <motion.span animate={{ rotate: [0, 20, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
-                                <FiZap size={13} />
-                            </motion.span>
-                            Next-Gen AI Personal Growth Platform
-                        </motion.span>
-                    </motion.div>
-
-                    {/* Headline */}
-                    <motion.h1
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ fontSize: 'clamp(38px, 7.5vw, 96px)', fontWeight: 900, marginBottom: 10, letterSpacing: '-0.025em', lineHeight: 1.02 }}
-                    >
-                        Unlock Your
-                    </motion.h1>
-
-                    {/* Gradient word — separate for animation */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.92 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        transition={{ duration: 1, delay: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ marginBottom: 18 }}
-                    >
-                        <span style={{
-                            fontFamily: 'Orbitron, monospace',
-                            fontSize: 'clamp(36px, 7vw, 92px)',
-                            fontWeight: 900,
-                            letterSpacing: '-0.02em',
-                            lineHeight: 1.0,
-                            background: 'linear-gradient(135deg, #7c3aed 0%, #00e5ff 50%, #e879f9 100%)',
-                            backgroundSize: '200% auto',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                            display: 'block',
-                            animation: 'gradient-shift 4s linear infinite',
-                        }}>
-                            Maximum Potential
-                        </span>
-                    </motion.div>
-
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.55 }}
-                        style={{ fontSize: 'clamp(16px, 1.6vw, 19px)', color: '#8888b8', marginBottom: 14, fontWeight: 300, letterSpacing: '0.02em' }}
-                    >
-                        with Artificial Intelligence
-                    </motion.p>
-
-                    {/* Sub-headline */}
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.65 }}
-                        style={{ fontSize: 'clamp(15px, 2vw, 19px)', color: '#6666a0', maxWidth: 600, margin: '0 auto 52px', lineHeight: 1.85 }}
-                    >
-                        PriMaX Hub fuses cutting-edge AI with neuroscience-backed growth frameworks to help you build habits, crush goals, and evolve — every single day.
-                    </motion.p>
-
-                    {/* CTAs */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.78 }}
-                        style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 70 }}
-                    >
-                        <motion.a
-                            href="/signup"
-                            className="btn btn-primary"
-                            whileHover={{ scale: 1.06, y: -3 }}
-                            whileTap={{ scale: 0.96 }}
-                            style={{ fontSize: 16, padding: '18px 40px', borderRadius: '100px', fontWeight: 800 }}
-                        >
-                            Start Growing Free <FiArrowRight />
-                        </motion.a>
-                        <motion.a
-                            href="#preview"
-                            className="btn btn-outline"
-                            whileHover={{ scale: 1.06, y: -3 }}
-                            whileTap={{ scale: 0.96 }}
-                            style={{ fontSize: 16, padding: '18px 40px', borderRadius: '100px' }}
-                        >
-                            <FiPlay size={16} /> Watch Demo
-                        </motion.a>
-                    </motion.div>
-
-                    {/* Stats row */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.9, duration: 0.7 }}
-                        style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', marginBottom: 48 }}
-                    >
-                        {statRings.map((s, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0.85 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 1 + i * 0.1 }}
-                                whileHover={{ scale: 1.06, y: -3 }}
-                                style={{
-                                    padding: '14px 24px', borderRadius: 18,
-                                    background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)',
-                                    border: `1px solid ${s.color}25`,
-                                    boxShadow: `0 0 30px ${s.color}12`,
-                                    textAlign: 'center', minWidth: 130,
-                                }}
+                    {/* LEFT: Content */}
+                    <div>
+                        {/* Badge */}
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} style={{ marginBottom: 28 }}>
+                            <motion.span
+                                className="section-tag"
+                                animate={{ boxShadow: ['0 0 0px rgba(0,229,255,0)', '0 0 20px rgba(0,229,255,0.3)', '0 0 0px rgba(0,229,255,0)'] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                                style={{ fontSize: 12, padding: '8px 22px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
                             >
-                                <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 26, fontWeight: 900, color: s.color, lineHeight: 1 }}>{s.value}</div>
-                                <div style={{ fontSize: 11, color: '#5a5a80', marginTop: 6, fontWeight: 600, letterSpacing: '0.05em' }}>{s.label}</div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
+                                <motion.span animate={{ rotate: [0, 20, 0] }} transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}>
+                                    <FiZap size={13} />
+                                </motion.span>
+                                Next-Gen AI Personal Growth Platform
+                            </motion.span>
+                        </motion.div>
 
-                    {/* Social proof */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 1.1, duration: 0.8 }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 20, flexWrap: 'wrap' }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                            {[260, 300, 200, 170, 130].map((hue, i) => (
-                                <div key={i} style={{ width: 34, height: 34, borderRadius: '50%', background: `linear-gradient(135deg, hsl(${hue},70%,50%), hsl(${hue + 40},70%,65%))`, border: '2px solid #03030f', marginLeft: i === 0 ? 0 : -10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, boxShadow: `0 0 10px rgba(124,58,237,0.3)` }}>
-                                    👤
+                        {/* Headline */}
+                        <motion.h1
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ fontSize: 'clamp(36px, 5.5vw, 72px)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: 12, color: '#f0f0ff' }}
+                        >
+                            Unlock Your
+                        </motion.h1>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                            style={{ marginBottom: 8 }}
+                        >
+                            <span style={{
+                                fontFamily: 'Orbitron, monospace',
+                                fontSize: 'clamp(34px, 5vw, 66px)',
+                                fontWeight: 900,
+                                letterSpacing: '-0.02em',
+                                lineHeight: 1.05,
+                                background: 'linear-gradient(135deg, #7c3aed 0%, #00e5ff 50%, #e879f9 100%)',
+                                backgroundSize: '200% auto',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                                display: 'block',
+                                animation: 'gradient-shift 4s linear infinite',
+                            }}>
+                                Maximum Potential
+                            </span>
+                        </motion.div>
+
+                        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+                            style={{ fontSize: 'clamp(14px, 1.4vw, 18px)', color: '#8888b8', marginBottom: 10, fontWeight: 300 }}>
+                            with Artificial Intelligence
+                        </motion.p>
+
+                        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}
+                            style={{ fontSize: 'clamp(13px, 1.2vw, 16px)', color: '#5a5a90', lineHeight: 1.85, marginBottom: 44, maxWidth: 480 }}>
+                            PriMaX Hub fuses cutting-edge AI with neuroscience-backed growth frameworks — helping you build habits, crush goals, and evolve every single day.
+                        </motion.p>
+
+                        {/* CTAs */}
+                        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.76 }}
+                            style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginBottom: 48 }}>
+                            <motion.a href="/signup" className="btn btn-primary" whileHover={{ scale: 1.06, y: -3 }} whileTap={{ scale: 0.96 }}
+                                style={{ fontSize: 15, padding: '16px 36px', borderRadius: '100px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                Start Growing Free <FiArrowRight />
+                            </motion.a>
+                            <motion.a href="#preview" className="btn btn-outline" whileHover={{ scale: 1.06, y: -3 }} whileTap={{ scale: 0.96 }}
+                                style={{ fontSize: 15, padding: '16px 36px', borderRadius: '100px' }}>
+                                See it in Action
+                            </motion.a>
+                        </motion.div>
+
+                        {/* Stats */}
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.88 }}
+                            style={{ display: 'flex', gap: 28, flexWrap: 'wrap', marginBottom: 28 }}>
+                            {statRings.map((s, i) => (
+                                <div key={i}>
+                                    <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 22, fontWeight: 900, color: s.color }}>{s.value}</div>
+                                    <div style={{ fontSize: 10, color: '#44446a', marginTop: 3, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.label}</div>
                                 </div>
                             ))}
+                        </motion.div>
+
+                        {/* Social proof */}
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1 }}
+                            style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex' }}>
+                                {[260, 300, 200, 170, 130].map((hue, i) => (
+                                    <div key={i} style={{ width: 30, height: 30, borderRadius: '50%', background: `linear-gradient(135deg, hsl(${hue},70%,50%), hsl(${hue + 40},70%,65%))`, border: '2px solid #03030f', marginLeft: i === 0 ? 0 : -8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>👤</div>
+                                ))}
+                            </div>
+                            <span style={{ color: '#5a5a80', fontSize: 13 }}><span style={{ color: '#00e5ff', fontWeight: 800 }}>50,000+</span> growth pioneers onboard</span>
+                            <span style={{ color: '#fbbf24', fontSize: 13 }}>★★★★★ <span style={{ color: '#5a5a80' }}>4.9</span></span>
+                        </motion.div>
+                    </div>
+
+                    {/* RIGHT: Dashboard Preview Card */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 60, scale: 0.94 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ position: 'relative' }}
+                    >
+                        <div style={{ position: 'absolute', inset: -40, borderRadius: 40, background: 'radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+                        <div style={{ borderRadius: 28, background: 'rgba(12, 8, 30, 0.88)', border: '1px solid rgba(124,58,237,0.25)', backdropFilter: 'blur(24px)', padding: 28, boxShadow: '0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(124,58,237,0.12)', overflow: 'hidden', position: 'relative' }}>
+                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg, transparent, rgba(124,58,237,0.5), rgba(0,229,255,0.4), transparent)' }} />
+
+                            {/* Card Header */}
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 22 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #7c3aed, #00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 0 16px rgba(124,58,237,0.5)' }}>⚡</div>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 800, color: '#f0f0ff', fontFamily: 'Orbitron, monospace', letterSpacing: '0.05em' }}>PriMa<span style={{ color: '#00e5ff' }}>X</span></div>
+                                        <div style={{ fontSize: 10, color: '#5a5a90', marginTop: 1 }}>Command Center</div>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                    <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981' }} />
+                                    <span style={{ fontSize: 10, color: '#10b981', fontWeight: 700 }}>LIVE</span>
+                                </div>
+                            </div>
+
+                            {/* Growth Score Ring */}
+                            <div style={{ textAlign: 'center', marginBottom: 22 }}>
+                                <div style={{ display: 'inline-block', position: 'relative' }}>
+                                    <svg width="110" height="110" style={{ transform: 'rotate(-90deg)' }}>
+                                        <defs>
+                                            <linearGradient id="heroScoreGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stopColor="#7c3aed" />
+                                                <stop offset="100%" stopColor="#00e5ff" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle cx="55" cy="55" r="44" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
+                                        <motion.circle cx="55" cy="55" r="44" fill="none" stroke="url(#heroScoreGrad)" strokeWidth="8" strokeLinecap="round"
+                                            strokeDasharray={276.5}
+                                            initial={{ strokeDashoffset: 276.5 }}
+                                            animate={{ strokeDashoffset: 276.5 - (276.5 * 0.847) }}
+                                            transition={{ duration: 2, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                                        />
+                                    </svg>
+                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 22, fontWeight: 900, background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>847</div>
+                                        <div style={{ fontSize: 9, color: '#5a5a90', fontWeight: 700, letterSpacing: '0.1em' }}>GROWTH</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Module Bars */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+                                {previewModules.map((m, i) => (
+                                    <motion.div key={i} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9 + i * 0.1 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                                                <div style={{ color: m.color, display: 'flex' }}>{m.icon}</div>
+                                                <span style={{ fontSize: 11, color: '#8888b8', fontWeight: 600 }}>{m.label}</span>
+                                            </div>
+                                            <span style={{ fontSize: 11, color: m.color, fontWeight: 800 }}>{m.value}</span>
+                                        </div>
+                                        <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
+                                            <motion.div
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${m.bar}%` }}
+                                                transition={{ duration: 1.2, delay: 1 + i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                                                style={{ height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${m.color}80, ${m.color})` }}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* AI Insight */}
+                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.5 }}
+                                style={{ marginTop: 18, padding: '11px 14px', borderRadius: 14, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.18)' }}>
+                                <div style={{ fontSize: 10, fontWeight: 800, color: '#00e5ff', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>🤖 AI Insight</div>
+                                <div style={{ fontSize: 12, color: '#8888b8', lineHeight: 1.5 }}>Your productivity peaks 8–11 AM. Schedule deep work now.</div>
+                            </motion.div>
                         </div>
-                        <div style={{ color: '#6666a0', fontSize: 14 }}>
-                            <span style={{ color: '#00e5ff', fontWeight: 800 }}>50,000+</span> growth pioneers already onboard
-                        </div>
-                        <div style={{ display: 'flex', gap: 3, color: '#fbbf24', alignItems: 'center' }}>
-                            {'★★★★★'.split('').map((s, i) => <span key={i} style={{ fontSize: 16 }}>{s}</span>)}
-                            <span style={{ color: '#6666a0', marginLeft: 6, fontSize: 14 }}>4.9/5</span>
-                        </div>
+
+                        {/* Floating accent cards */}
+                        <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+                            style={{ position: 'absolute', top: -18, right: -20, padding: '9px 14px', borderRadius: 14, background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', backdropFilter: 'blur(12px)' }}>
+                            <div style={{ fontSize: 11, fontWeight: 800, color: '#10b981', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <FiAward size={11} /> +24 pts this week
+                            </div>
+                        </motion.div>
+                        <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+                            style={{ position: 'absolute', bottom: -14, left: -24, padding: '9px 14px', borderRadius: 14, background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)', backdropFilter: 'blur(12px)' }}>
+                            <div style={{ fontSize: 11, fontWeight: 800, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <FiTarget size={11} /> 21-day streak 🔥
+                            </div>
+                        </motion.div>
                     </motion.div>
                 </div>
             </motion.div>
 
-            {/* ── SCROLL INDICATOR ── */}
-            <motion.div
-                style={{ position: 'absolute', bottom: 36, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 3 }}
-                animate={{ opacity: [0.3, 0.9, 0.3] }}
-                transition={{ duration: 2.5, repeat: Infinity }}
-            >
-                <span style={{ fontSize: 10, color: '#44446a', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>Scroll</span>
-                <motion.div
-                    animate={{ scaleY: [0.4, 1, 0.4] }}
-                    transition={{ duration: 2.5, repeat: Infinity }}
-                    style={{ width: 1, height: 50, background: 'linear-gradient(to bottom, rgba(0,229,255,0.7), transparent)', transformOrigin: 'top' }}
-                />
+            {/* Scroll indicator */}
+            <motion.div style={{ position: 'absolute', bottom: 28, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, zIndex: 3 }}
+                animate={{ opacity: [0.3, 0.9, 0.3] }} transition={{ duration: 2.5, repeat: Infinity }}>
+                <span style={{ fontSize: 9, color: '#44446a', letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700 }}>Scroll</span>
+                <motion.div animate={{ scaleY: [0.4, 1, 0.4] }} transition={{ duration: 2.5, repeat: Infinity }}
+                    style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, rgba(0,229,255,0.7), transparent)', transformOrigin: 'top' }} />
             </motion.div>
 
-            {/* Mobile-hide floating badges */}
             <style>{`
-                @media (max-width: 768px) {
-                    .hero-badge-wrapper { display: none !important; }
+                .hero-grid {
+                    max-width: 1280px;
+                    margin: 0 auto;
+                    padding: 100px 56px 80px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 72px;
+                    align-items: center;
+                }
+                @media (max-width: 960px) {
+                    .hero-grid {
+                        grid-template-columns: 1fr !important;
+                        padding: 80px 24px 60px !important;
+                        gap: 48px !important;
+                        text-align: center;
+                    }
+                    .hero-grid > div:last-child { order: -1; }
                 }
             `}</style>
         </section>

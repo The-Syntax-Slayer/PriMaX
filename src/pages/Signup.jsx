@@ -103,15 +103,18 @@ export default function Signup() {
                 transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
                 <div className="auth-logo">
-                    <motion.div
-                        className="auth-logo-icon"
-                        animate={{ boxShadow: ['0 0 20px rgba(232,121,249,0.5)', '0 0 40px rgba(124,58,237,0.4)', '0 0 20px rgba(232,121,249,0.5)'] }}
-                        transition={{ duration: 3, repeat: Infinity }}
-                    >
-                        ⚡
-                    </motion.div>
-                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 18, fontWeight: 700, color: '#eeeeff' }}>
-                        PriMaX<span style={{ color: '#00e5ff' }}>Hub</span>
+                    <div style={{
+                        width: 44, height: 44, borderRadius: 14,
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #00e5ff 100%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 0 28px rgba(124,58,237,0.7), inset 0 1px 0 rgba(255,255,255,0.2)',
+                        position: 'relative', overflow: 'hidden', flexShrink: 0,
+                    }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 60%)' }} />
+                        <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 15, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', position: 'relative', zIndex: 1 }}>PX</span>
+                    </div>
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 19, fontWeight: 800, letterSpacing: '0.02em', lineHeight: 1 }}>
+                        <span style={{ background: 'linear-gradient(135deg, #c4b5fd, #f0f0ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PriMaX</span><span style={{ color: '#00e5ff' }}> Hub</span>
                     </span>
                 </div>
 
