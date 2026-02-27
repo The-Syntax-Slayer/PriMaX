@@ -32,18 +32,6 @@
 
 ---
 
-## 🎨 Visual Showcase
-
-### **Premium User Experience**
-![Landing Page UI](./public/readme/hero.png)
-> *The modern, landscape-oriented Hero section designed for impact.*
-
-### **Secure Authentication**
-![Login UI](./public/readme/login.png)
-> *Seamless auth experience powered by Supabase.*
-
----
-
 ## 🛠️ Tech Stack
 
 - **Core**: React 19, Vite, React Router Dom 7
