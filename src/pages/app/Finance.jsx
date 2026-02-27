@@ -43,7 +43,7 @@ export default function Finance() {
             </motion.div>
             <div className="module-tabs" style={{ marginBottom: 24 }}>
                 {TABS.map(t => (
-                    <button key={t.id} onClick={() => setTab(t.id)} className={`module-tab?{tab === t.id ? ' active' : ''}`}>
+                    <button key={t.id} onClick={() => setTab(t.id)} className={`module-tab${tab === t.id ? ' active' : ''}`}>
                         {t.icon} {t.label}
                     </button>
                 ))}
@@ -97,9 +97,9 @@ function FinanceOverview({ userId }) {
     );
 
     const stats = [
-        { label: 'Total Income', value: `??{data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
-        { label: 'Total Expenses', value: `??{data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
-        { label: 'Net Balance', value: `?{data.net >= 0 ? '+' : ''}$?{data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
+        { label: 'Total Income', value: `$${data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
+        { label: 'Total Expenses', value: `$${data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
+        { label: 'Net Balance', value: `${data.net >= 0 ? '+' : ''}$${data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
         { label: 'Savings Goals', value: data.goals.length, delta: 'active goals', color: '#7c3aed', icon: '🏦', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.2)' },
     ];
 
@@ -112,8 +112,8 @@ function FinanceOverview({ userId }) {
                 {stats.map((s, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                         whileHover={{ scale: 1.03, y: -3 }}
-                        style={{ padding: '22px', borderRadius: 20, background: s.bg, border: `1px solid ?{s.border}`, position: 'relative', overflow: 'hidden' }}>
-                        <div style={{ position: 'absolute', top: -20, right: -20, width: 70, height: 70, borderRadius: '50%', background: `?{s.color}18`, filter: 'blur(15px)' }} />
+                        style={{ padding: '22px', borderRadius: 20, background: s.bg, border: `1px solid ${s.border}`, position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', top: -20, right: -20, width: 70, height: 70, borderRadius: '50%', background: `${s.color}18`, filter: 'blur(15px)' }} />
                         <div style={{ fontSize: 24, marginBottom: 12 }}>{s.icon}</div>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 26, fontWeight: 900, color: s.color, lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-1)', fontWeight: 600, marginBottom: 2 }}>{s.label}</div>
@@ -134,14 +134,14 @@ function FinanceOverview({ userId }) {
                                     <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <span style={{ fontSize: 16 }}>{CAT_ICONS[cat] || '📦'}</span> {cat}
                                     </span>
-                                    <span style={{ fontSize: 13, fontWeight: 800, color: CAT_COLORS[cat] || '#5a5a80' }}>?{amt.toFixed(0)}</span>
+                                    <span style={{ fontSize: 13, fontWeight: 800, color: CAT_COLORS[cat] || '#5a5a80' }}>${amt.toFixed(0)}</span>
                                 </div>
                                 <div style={{ height: 7, borderRadius: 4, background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
                                     <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `?{(amt / maxCat) * 100}%` }}
+                                        animate={{ width: `${(amt / maxCat) * 100}%` }}
                                         transition={{ duration: 1, delay: 0.3 + i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                                        style={{ height: '100%', borderRadius: 4, background: `linear-gradient(90deg, ?{CAT_COLORS[cat] || '#5a5a80'}, ?{CAT_COLORS[cat] || '#5a5a80'}88)` }}
+                                        style={{ height: '100%', borderRadius: 4, background: `linear-gradient(90deg, ${CAT_COLORS[cat] || '#5a5a80'}, ${CAT_COLORS[cat] || '#5a5a80'}88)` }}
                                     />
                                 </div>
                             </motion.div>
@@ -163,10 +163,10 @@ function FinanceOverview({ userId }) {
                                         <span style={{ fontSize: 13, color: '#10b981', fontWeight: 800 }}>{pct}%</span>
                                     </div>
                                     <div style={{ height: 7, borderRadius: 4, background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `?{pct}%` }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                                             style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, #10b981, #00e5ff)' }} />
                                     </div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>?{Number(g.current_amount).toFixed(0)} of ?{Number(g.target_amount).toFixed(0)}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>${Number(g.current_amount).toFixed(0)} of ${Number(g.target_amount).toFixed(0)}</div>
                                 </div>
                             );
                         })}
@@ -200,7 +200,7 @@ function Transactions({ userId }) {
             if (form.type === 'expense') {
                 const { data: budget } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('category', form.category).single();
                 if (budget) {
-                    const now = new Date(); const firstDay = `?{now.getFullYear()}-?{String(now.getMonth() + 1).padStart(2, '0')}-01`;
+                    const now = new Date(); const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
                     const { data: tRes } = await supabase.from('transactions').select('amount').eq('user_id', userId).eq('category', form.category).eq('type', 'expense').gte('date', firstDay);
                     const spent = (tRes || []).reduce((s, t) => s + Number(t.amount), 0);
 
@@ -208,7 +208,7 @@ function Transactions({ userId }) {
                         await supabase.from('notifications').insert({
                             user_id: userId,
                             title: 'Budget Alert!',
-                            message: `Warning: You have exceeded your ?{form.category} budget by $?{(spent - budget.limit_amount).toFixed(2)}.`,
+                            message: `Warning: You have exceeded your ${form.category} budget by $${(spent - budget.limit_amount).toFixed(2)}.`,
                             type: 'warning'
                         });
                     }
@@ -271,21 +271,21 @@ function Transactions({ userId }) {
                                 initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
                                 transition={{ delay: i > 10 ? 0 : i * 0.04 }}
                                 whileHover={{ x: 4 }}
-                                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 16, background: 'var(--app-surface)', border: `1px solid ?{t.type === 'income' ? 'rgba(16,185,129,0.15)' : 'var(--app-border)'}`, transition: 'all 0.22s' }}
+                                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 16, background: 'var(--app-surface)', border: `1px solid ${t.type === 'income' ? 'rgba(16,185,129,0.15)' : 'var(--app-border)'}`, transition: 'all 0.22s' }}
                             >
-                                <div style={{ width: 40, height: 40, borderRadius: 12, background: `?{CAT_COLORS[t.category] || '#5a5a80'}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+                                <div style={{ width: 40, height: 40, borderRadius: 12, background: `${CAT_COLORS[t.category] || '#5a5a80'}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
                                     {CAT_ICONS[t.category] || '📦'}
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>{t.description}</div>
                                     <div style={{ display: 'flex', gap: 8, marginTop: 3 }}>
-                                        <span style={{ fontSize: 11, color: 'var(--text-3)', padding: '1px 7px', borderRadius: 6, background: `?{CAT_COLORS[t.category] || '#5a5a80'}14` }}>{t.category}</span>
+                                        <span style={{ fontSize: 11, color: 'var(--text-3)', padding: '1px 7px', borderRadius: 6, background: `${CAT_COLORS[t.category] || '#5a5a80'}14` }}>{t.category}</span>
                                         <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{t.date}</span>
                                     </div>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 15, fontWeight: 800, color: t.type === 'income' ? '#10b981' : '#ef4444' }}>
                                     {t.type === 'income' ? <FiTrendingUp size={13} /> : <FiTrendingDown size={13} />}
-                                    {t.type === 'income' ? '+' : '-'}?{Number(t.amount).toFixed(2)}
+                                    {t.type === 'income' ? '+' : '-'}${Number(t.amount).toFixed(2)}
                                 </div>
                                 <button onClick={() => delTx(t.id)} className="btn-danger"><FiTrash2 size={13} /></button>
                             </motion.div>
@@ -306,7 +306,7 @@ function Budgets({ userId }) {
 
     useEffect(() => {
         (async () => {
-            const now = new Date(); const firstDay = `?{now.getFullYear()}-?{String(now.getMonth() + 1).padStart(2, '0')}-01`;
+            const now = new Date(); const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
             const [bRes, tRes] = await Promise.all([
                 supabase.from('budgets').select('*').eq('user_id', userId),
                 supabase.from('transactions').select('amount,category').eq('user_id', userId).eq('type', 'expense').gte('date', firstDay),
@@ -366,15 +366,15 @@ function Budgets({ userId }) {
                         return (
                             <motion.div key={b.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
                                 whileHover={{ y: -2 }}>
-                                <Card style={{ borderLeft: `3px solid ?{color}` }}>
+                                <Card style={{ borderLeft: `3px solid ${color}` }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 14 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                            <div style={{ width: 36, height: 36, borderRadius: 10, background: `?{color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                                            <div style={{ width: 36, height: 36, borderRadius: 10, background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                                                 {CAT_ICONS[b.category] || '📦'}
                                             </div>
                                             <div>
                                                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>{b.category}</div>
-                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>?{spent.toFixed(0)} / ?{Number(b.limit_amount).toFixed(0)} this month</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>${spent.toFixed(0)} / ${Number(b.limit_amount).toFixed(0)} this month</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -383,13 +383,13 @@ function Budgets({ userId }) {
                                         </div>
                                     </div>
                                     <div style={{ height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `?{pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                                            style={{ height: '100%', borderRadius: 4, background: over ? '#ef4444' : `linear-gradient(90deg, ?{b.color}, ?{b.color}88)` }} />
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                                            style={{ height: '100%', borderRadius: 4, background: over ? '#ef4444' : `linear-gradient(90deg, ${b.color}, ${b.color}88)` }} />
                                     </div>
                                     {over && (
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                             style={{ marginTop: 10, padding: '7px 12px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, color: '#f87171', fontWeight: 600 }}>
-                                            ⚠️ Budget exceeded by ?{(spent - Number(b.limit_amount)).toFixed(0)}
+                                            ⚠️ Budget exceeded by ${(spent - Number(b.limit_amount)).toFixed(0)}
                                         </motion.div>
                                     )}
                                 </Card>
@@ -486,17 +486,17 @@ function SavingsGoals({ userId }) {
                                             >{g.icon}</motion.div>
                                             <div>
                                                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)' }}>{g.name}</div>
-                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Target: ?{Number(g.target_amount).toFixed(0)}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Target: ${Number(g.target_amount).toFixed(0)}</div>
                                             </div>
                                         </div>
                                         <button onClick={() => delGoal(g.id)} className="btn-danger" style={{ alignSelf: 'flex-start' }}><FiTrash2 size={13} /></button>
                                     </div>
                                     <div style={{ height: 9, borderRadius: 5, background: 'rgba(255,255,255,0.05)', marginBottom: 8, overflow: 'hidden' }}>
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `?{pct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
                                             style={{ height: '100%', borderRadius: 5, background: 'linear-gradient(90deg, #10b981, #00e5ff)', boxShadow: '0 0 10px rgba(16,185,129,0.4)' }} />
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 14 }}>
-                                        <span style={{ color: 'var(--text-2)' }}>?{Number(g.current_amount).toFixed(0)} saved</span>
+                                        <span style={{ color: 'var(--text-2)' }}>${Number(g.current_amount).toFixed(0)} saved</span>
                                         <span style={{ color: '#10b981', fontWeight: 800 }}>{pct}%</span>
                                     </div>
                                     {!complete && (
@@ -539,8 +539,8 @@ function AIFinanceAdvisor({ userId }) {
         const { data: txs } = await supabase.from('transactions').select('amount,type,category').eq('user_id', userId).limit(20);
         const income = (txs || []).filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
         const expense = (txs || []).filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        const ctx = txs?.length ? `Financial snapshot: $?{income.toFixed(0)} income, $?{expense.toFixed(0)} expenses, net $?{(income - expense).toFixed(0)}.` : 'No transaction data yet.';
-        const { text, error } = await callGemini(`?{ctx}\n\nQuestion: "?{q}"`, SYSTEM_PROMPTS.finance);
+        const ctx = txs?.length ? `Financial snapshot: $${income.toFixed(0)} income, $${expense.toFixed(0)} expenses, net $${(income - expense).toFixed(0)}.` : 'No transaction data yet.';
+        const { text, error } = await callGemini(`${ctx}\n\nQuestion: "${q}"`, SYSTEM_PROMPTS.finance);
         if (!error && text) {
             setAdvice(text);
             await supabase.from('ai_history').insert({
@@ -550,7 +550,7 @@ function AIFinanceAdvisor({ userId }) {
                 response: text
             });
         } else {
-            setAdvice(error ? `⚠️ ?{error}` : '');
+            setAdvice(error ? `⚠️ ${error}` : '');
         }
         setLoading(false);
     };
@@ -635,7 +635,7 @@ function Subscriptions({ userId }) {
                         <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>Estimated average across all cycles</div>
                     </div>
                     <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 24, fontWeight: 900, color: '#00e5ff' }}>
-                        ?{totalMonthly.toFixed(2)}
+                        ${totalMonthly.toFixed(2)}
                     </div>
                 </div>
             </Card>
@@ -684,7 +684,7 @@ function Subscriptions({ userId }) {
                                 </div>
                                 <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-1)' }}>?{Number(s.amount).toFixed(2)}</div>
+                                        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--text-1)' }}>${Number(s.amount).toFixed(2)}</div>
                                         <div style={{ fontSize: 10, color: '#7c3aed', fontWeight: 700, textTransform: 'uppercase' }}>{s.billing_cycle}</div>
                                     </div>
                                     <button onClick={() => delSub(s.id)} className="btn-danger"><FiTrash2 size={13} /></button>
