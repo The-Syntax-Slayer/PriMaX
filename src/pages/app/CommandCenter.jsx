@@ -236,7 +236,7 @@ export default function CommandCenter() {
                 openTasks: openT,
                 streak: maxStreak,
                 goals: gs,
-                net: net !== 0 ? `${net >= 0 ? '+' : ''}$${Math.abs(net).toFixed(0)}` : '$0',
+                net: net !== 0 ? `${net >= 0 ? '+' : ''}₹${Math.abs(net).toFixed(0)}` : '₹0',
                 workouts: ws,
                 journals: js,
                 careerRole: careerRes.data?.target_role || null,

@@ -11,7 +11,7 @@ const statRings = [
 
 const previewModules = [
     { icon: <FiZap size={14} />, label: 'Productivity', value: '94%', color: '#00e5ff', bar: 94 },
-    { icon: <FiTrendingUp size={14} />, label: 'Finance', value: '$82,400', color: '#10b981', bar: 72 },
+    { icon: <FiTrendingUp size={14} />, label: 'Finance', value: '₹82,400', color: '#10b981', bar: 72 },
     { icon: <FiActivity size={14} />, label: 'Fitness', value: '18d streak', color: '#e879f9', bar: 86 },
     { icon: <FiBarChart2 size={14} />, label: 'Career Growth', value: '\u2191 +24pts', color: '#fbbf24', bar: 68 },
 ];
