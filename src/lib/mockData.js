@@ -1,132 +1,900 @@
 import { supabase } from './supabase';
 
+/**
+ * PriMaX Hub — Professional Presentation Mode
+ * Injects realistic, high-quality demo data for every module component.
+ * 
+ * Persona: "Alex Rivera" — Senior Full-Stack Engineer targeting Staff Engineer
+ * Context: Data reflects a high-performing professional in week 3 of using PriMaX Hub.
+ */
 export const injectMockData = async (userId) => {
     if (!userId) return { error: 'No user ID provided' };
 
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
     const d = (daysAgo) => {
-        const d = new Date(now);
-        d.setDate(d.getDate() - daysAgo);
-        return d.toISOString().split('T')[0];
+        const dt = new Date(now);
+        dt.setDate(dt.getDate() - daysAgo);
+        return dt.toISOString().split('T')[0];
     };
-    const ts = (daysAgo, hour = 10) => {
-        const d = new Date(now);
-        d.setDate(d.getDate() - daysAgo);
-        d.setHours(hour, 0, 0, 0);
-        return d.toISOString();
+    const ts = (daysAgo, hour = 9, min = 0) => {
+        const dt = new Date(now);
+        dt.setDate(dt.getDate() - daysAgo);
+        dt.setHours(hour, min, 0, 0);
+        return dt.toISOString();
+    };
+    const nextBill = (daysFromNow) => {
+        const dt = new Date(now);
+        dt.setDate(dt.getDate() + daysFromNow);
+        return dt.toISOString().split('T')[0];
     };
 
     try {
-        // 1. Tasks (Kanban)
+        // ══════════════════════════════════════════════════
+        // MODULE 1: PRODUCTIVITY — Tasks (Kanban Board)
+        // ══════════════════════════════════════════════════
         await supabase.from('tasks').insert([
-            { user_id: userId, title: 'Finalize Q2 Growth Strategy', status: 'inprogress', priority: 'high', due_date: d(1) },
-            { user_id: userId, title: 'Schedule performance review', status: 'todo', priority: 'medium', due_date: d(3) },
-            { user_id: userId, title: 'Morning 5km run', status: 'done', priority: 'medium', due_date: today },
-            { user_id: userId, title: 'Complete budget audit for March', status: 'todo', priority: 'high', due_date: d(0) },
-            { user_id: userId, title: 'Read "Deep Work" - Chapter 5', status: 'inprogress', priority: 'low', due_date: d(2) },
-            { user_id: userId, title: 'Update LinkedIn profile', status: 'done', priority: 'low', due_date: d(5) },
-            { user_id: userId, title: 'Prepare investor pitch deck', status: 'inprogress', priority: 'high', due_date: d(1) },
-            { user_id: userId, title: 'Call with mentor – career path', status: 'done', priority: 'medium', due_date: d(3) },
-            { user_id: userId, title: 'Launch side project MVP', status: 'todo', priority: 'high', due_date: d(7) },
-            { user_id: userId, title: 'Journal – weekly reflection', status: 'done', priority: 'low', due_date: today },
+            {
+                user_id: userId,
+                title: 'Architect microservices auth layer for V2 platform',
+                status: 'inprogress',
+                priority: 'high',
+                due_date: d(1),
+            },
+            {
+                user_id: userId,
+                title: 'Write technical spec for new data pipeline',
+                status: 'inprogress',
+                priority: 'high',
+                due_date: d(0),
+            },
+            {
+                user_id: userId,
+                title: 'Code review: payment gateway PR #214',
+                status: 'inprogress',
+                priority: 'medium',
+                due_date: d(0),
+            },
+            {
+                user_id: userId,
+                title: 'Prepare sprint retrospective slides',
+                status: 'todo',
+                priority: 'medium',
+                due_date: d(-2),
+            },
+            {
+                user_id: userId,
+                title: 'Update API documentation for v2.1 endpoints',
+                status: 'todo',
+                priority: 'medium',
+                due_date: d(-3),
+            },
+            {
+                user_id: userId,
+                title: 'Research system design patterns for distributed caching',
+                status: 'todo',
+                priority: 'low',
+                due_date: d(-5),
+            },
+            {
+                user_id: userId,
+                title: 'Fix performance regression in search query (N+1 issue)',
+                status: 'todo',
+                priority: 'high',
+                due_date: d(1),
+            },
+            {
+                user_id: userId,
+                title: 'Complete onboarding checklist for new team member',
+                status: 'done',
+                priority: 'medium',
+                due_date: d(3),
+            },
+            {
+                user_id: userId,
+                title: 'Deploy staging environment for Q2 release candidate',
+                status: 'done',
+                priority: 'high',
+                due_date: d(4),
+            },
+            {
+                user_id: userId,
+                title: 'Refactor authentication middleware to use JWT refresh tokens',
+                status: 'done',
+                priority: 'high',
+                due_date: d(6),
+            },
         ]);
 
-        // 2. Habits (Productivity + Fitness + Mental)
+        // ══════════════════════════════════════════════════
+        // MODULE 1: PRODUCTIVITY — Habits
+        // ══════════════════════════════════════════════════
         await supabase.from('habits').insert([
-            { user_id: userId, name: 'Deep Work (2hr block)', module: 'productivity', streak: 14, completions: [today, d(1), d(2), d(3), d(4)] },
-            { user_id: userId, name: 'Morning Meditation', module: 'mental', streak: 7, completions: [today, d(1), d(2)] },
-            { user_id: userId, name: '10,000 Steps', module: 'fitness', streak: 5, completions: [today, d(1)] },
-            { user_id: userId, name: 'Read for 30 mins', module: 'productivity', streak: 20, completions: [today, d(1), d(2), d(3)] },
-            { user_id: userId, name: 'Gratitude Log', module: 'mental', streak: 12, completions: [today, d(1), d(2), d(3), d(4), d(5)] },
-            { user_id: userId, name: 'Cold Shower', module: 'fitness', streak: 3, completions: [today, d(1)] },
-            { user_id: userId, name: 'No Social Media before 10am', module: 'productivity', streak: 8, completions: [today, d(1), d(2)] },
+            {
+                user_id: userId,
+                name: 'Deep Work Session (90 min, no interruptions)',
+                module: 'productivity',
+                streak: 21,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5), d(6)],
+            },
+            {
+                user_id: userId,
+                name: 'Daily planning — review tasks & set top 3 priorities',
+                module: 'productivity',
+                streak: 14,
+                completions: [d(0), d(1), d(2), d(3), d(4)],
+            },
+            {
+                user_id: userId,
+                name: 'Read 30 min — engineering books / papers',
+                module: 'productivity',
+                streak: 30,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5), d(6), d(7)],
+            },
+            {
+                user_id: userId,
+                name: 'No screen time after 10:30 PM',
+                module: 'productivity',
+                streak: 8,
+                completions: [d(0), d(1), d(2)],
+            },
         ]);
 
-        // 3. Finance – Transactions
-        await supabase.from('transactions').insert([
-            { user_id: userId, description: 'Client Project Alpha', amount: 3500, type: 'income', category: 'Freelance', date: today },
-            { user_id: userId, description: 'Monthly Salary', amount: 5200, type: 'income', category: 'Salary', date: d(5) },
-            { user_id: userId, description: 'Design Course', amount: 149, type: 'income', category: 'Education Revenue', date: d(8) },
-            { user_id: userId, description: 'Apartment Rent', amount: 1200, type: 'expense', category: 'Housing', date: d(2) },
-            { user_id: userId, description: 'Gym Membership', amount: 55, type: 'expense', category: 'Health', date: d(4) },
-            { user_id: userId, description: 'Supermarket', amount: 120, type: 'expense', category: 'Food', date: d(1) },
-            { user_id: userId, description: 'AWS Cloud Services', amount: 38, type: 'expense', category: 'Tech', date: today },
-            { user_id: userId, description: 'Coffee Subscription', amount: 19, type: 'expense', category: 'Food', date: d(6) },
-            { user_id: userId, description: 'Udemy Courses', amount: 60, type: 'expense', category: 'Education', date: d(9) },
-            { user_id: userId, description: 'Client Beta Bonus', amount: 800, type: 'income', category: 'Freelance', date: d(3) },
-        ]);
-
-        // 4. Finance – Savings Goals
-        await supabase.from('savings_goals').insert([
-            { user_id: userId, name: 'Emergency Fund', target: 10000, current: 6800, icon: '🛡️', deadline: d(-90) },
-            { user_id: userId, name: 'MacBook Pro M3', target: 3200, current: 2100, icon: '💻', deadline: d(-30) },
-            { user_id: userId, name: 'Europe Trip 2025', target: 5000, current: 1750, icon: '✈️', deadline: d(-120) },
-        ]).select();
-
-        // 5. Fitness – Workouts
-        await supabase.from('workouts').insert([
-            { user_id: userId, name: 'Upper Body Power', type: 'Strength', duration_minutes: 60, completed_at: ts(0, 7) },
-            { user_id: userId, name: 'Evening Cardio', type: 'Cardio', duration_minutes: 35, completed_at: ts(1, 18) },
-            { user_id: userId, name: 'Lower Body & Core', type: 'Strength', duration_minutes: 50, completed_at: ts(2, 7) },
-            { user_id: userId, name: 'HIIT Sprint Session', type: 'HIIT', duration_minutes: 25, completed_at: ts(3, 6) },
-            { user_id: userId, name: 'Yoga & Flexibility', type: 'Flexibility', duration_minutes: 40, completed_at: ts(5, 8) },
-            { user_id: userId, name: 'Long Cycle Ride', type: 'Cardio', duration_minutes: 75, completed_at: ts(6, 9) },
-            { user_id: userId, name: 'Full Body Compound', type: 'Strength', duration_minutes: 65, completed_at: ts(7, 7) },
-        ]);
-
-        // 6. Mental – Journal Entries
-        await supabase.from('journal_entries').insert([
-            { user_id: userId, title: 'Breakthrough on the project', content: 'Finally solved the architecture problem that has been blocking me for 3 days. The key was simplifying the data layer. Feeling energized and confident.', mood: 'great', date: today },
-            { user_id: userId, title: 'Morning reflections', content: 'Grateful for waking up healthy. The morning meditation really set the tone for a focused day. Productivity felt effortless.', mood: 'good', date: d(1) },
-            { user_id: userId, title: 'Tough meeting, but growth', content: 'Received hard feedback today. Initially stung, but after reflection I see the value. Every critique is a gift in disguise.', mood: 'neutral', date: d(3) },
-            { user_id: userId, title: 'Rest day thoughts', content: 'Sometimes the most productive thing is to rest. Read for 2 hours, cooked a good meal, watched a documentary. Recharged.', mood: 'good', date: d(5) },
-            { user_id: userId, title: 'Weekly goals set', content: 'Mapped out this week\'s priorities. The key insight: doing 3 things exceptionally beats doing 10 things poorly. Focus is a superpower.', mood: 'great', date: d(7) },
-        ]);
-
-        // 7. Mental – Mood Logs
-        await supabase.from('mood_logs').insert([
-            { user_id: userId, mood: 5, note: 'Incredible focus day!', logged_at: ts(0, 20) },
-            { user_id: userId, mood: 4, note: 'Productive and calm', logged_at: ts(1, 21) },
-            { user_id: userId, mood: 3, note: 'Slightly off – tired', logged_at: ts(2, 20) },
-            { user_id: userId, mood: 5, note: 'Best week in a while', logged_at: ts(3, 22) },
-            { user_id: userId, mood: 4, note: 'Good energy', logged_at: ts(5, 19) },
-            { user_id: userId, mood: 4, note: 'Lifted PRs at gym!', logged_at: ts(6, 21) },
-            { user_id: userId, mood: 5, note: 'Flow state for 4 hours', logged_at: ts(7, 20) },
-        ]);
-
-        // 8. Focus Sessions
+        // ══════════════════════════════════════════════════
+        // MODULE 1: PRODUCTIVITY — Focus Sessions
+        // ══════════════════════════════════════════════════
         await supabase.from('focus_sessions').insert([
-            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(0, 9) },
-            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(0, 10) },
-            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(1, 9) },
-            { user_id: userId, duration_minutes: 50, mode: 'focus', completed_at: ts(2, 8) },
-            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(3, 11) },
-            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(4, 10) },
+            { user_id: userId, duration_minutes: 90, mode: 'focus', completed_at: ts(0, 9, 30) },
+            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(0, 11, 0) },
+            { user_id: userId, duration_minutes: 25, mode: 'short_break', completed_at: ts(0, 11, 30) },
+            { user_id: userId, duration_minutes: 90, mode: 'focus', completed_at: ts(1, 8, 45) },
+            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(1, 14, 0) },
+            { user_id: userId, duration_minutes: 50, mode: 'focus', completed_at: ts(2, 9, 0) },
+            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(2, 15, 0) },
+            { user_id: userId, duration_minutes: 90, mode: 'focus', completed_at: ts(3, 10, 0) },
+            { user_id: userId, duration_minutes: 25, mode: 'focus', completed_at: ts(4, 9, 0) },
+            { user_id: userId, duration_minutes: 90, mode: 'focus', completed_at: ts(5, 8, 30) },
         ]);
 
-        // 9. Career Profile
-        await supabase.from('career_profiles').upsert({
-            user_id: userId,
-            full_name: 'Alex Growth',
-            target_role: 'Senior Full-Stack Engineer',
-            current_role: 'Full-Stack Developer',
-            skills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'System Design', 'AI/ML Integration'],
-            experience_years: 4,
-            summary: 'Passionate engineer building next-gen products with AI and modern web technologies. Focused on scalable architecture and exceptional user experiences.',
-        });
+        // ══════════════════════════════════════════════════
+        // MODULE 2: FITNESS — Workouts
+        // ══════════════════════════════════════════════════
+        await supabase.from('workouts').insert([
+            {
+                user_id: userId,
+                name: 'Upper Body Hypertrophy — Push Focus',
+                type: 'Strength',
+                duration_minutes: 65,
+                completed_at: ts(0, 6, 30),
+            },
+            {
+                user_id: userId,
+                name: 'Zone 2 Aerobic — Steady State Run',
+                type: 'Cardio',
+                duration_minutes: 45,
+                completed_at: ts(1, 7, 0),
+            },
+            {
+                user_id: userId,
+                name: 'Lower Body Power — Squat & Deadlift',
+                type: 'Strength',
+                duration_minutes: 70,
+                completed_at: ts(2, 6, 45),
+            },
+            {
+                user_id: userId,
+                name: 'HIIT Intervals — 8 x 30s Sprints',
+                type: 'HIIT',
+                duration_minutes: 30,
+                completed_at: ts(3, 6, 30),
+            },
+            {
+                user_id: userId,
+                name: 'Yoga Flow & Mobility Work',
+                type: 'Yoga',
+                duration_minutes: 50,
+                completed_at: ts(4, 7, 0),
+            },
+            {
+                user_id: userId,
+                name: 'Full Body Compound Lifts',
+                type: 'Strength',
+                duration_minutes: 75,
+                completed_at: ts(5, 6, 30),
+            },
+            {
+                user_id: userId,
+                name: 'Long Endurance Cycle — Riverside Route',
+                type: 'Cycling',
+                duration_minutes: 90,
+                completed_at: ts(6, 8, 0),
+            },
+            {
+                user_id: userId,
+                name: 'Pull Day — Back, Biceps & Rear Delts',
+                type: 'Strength',
+                duration_minutes: 60,
+                completed_at: ts(7, 6, 45),
+            },
+            {
+                user_id: userId,
+                name: '10K Easy Pace Run',
+                type: 'Running',
+                duration_minutes: 55,
+                completed_at: ts(9, 7, 0),
+            },
+            {
+                user_id: userId,
+                name: 'Tabata Circuit — Core & Conditioning',
+                type: 'HIIT',
+                duration_minutes: 25,
+                completed_at: ts(10, 6, 30),
+            },
+        ]);
 
-        // 10. Notifications
+        // Fitness Habits
+        await supabase.from('habits').insert([
+            {
+                user_id: userId,
+                name: '10,000+ Steps Daily',
+                module: 'fitness',
+                streak: 12,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5)],
+            },
+            {
+                user_id: userId,
+                name: 'Train before 8AM',
+                module: 'fitness',
+                streak: 18,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5), d(6)],
+            },
+            {
+                user_id: userId,
+                name: 'Protein intake target — 180g daily',
+                module: 'fitness',
+                streak: 5,
+                completions: [d(0), d(1), d(2)],
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 3: FINANCE — Transactions (realistic spread)
+        // ══════════════════════════════════════════════════
+        await supabase.from('transactions').insert([
+            // Income
+            {
+                user_id: userId,
+                description: 'Monthly Salary — TechCorp Inc.',
+                amount: 7500,
+                type: 'income',
+                category: 'Other',
+                date: d(3),
+            },
+            {
+                user_id: userId,
+                description: 'Freelance Contract — API Integration (Acme Labs)',
+                amount: 2800,
+                type: 'income',
+                category: 'Other',
+                date: d(8),
+            },
+            {
+                user_id: userId,
+                description: 'Teaching Assistant — Udemy Course Revenue',
+                amount: 340,
+                type: 'income',
+                category: 'Other',
+                date: d(12),
+            },
+            {
+                user_id: userId,
+                description: 'GitHub Sponsors — Open Source Contribution',
+                amount: 180,
+                type: 'income',
+                category: 'Other',
+                date: d(15),
+            },
+
+            // Housing
+            {
+                user_id: userId,
+                description: 'Monthly Apartment Rent',
+                amount: 1650,
+                type: 'expense',
+                category: 'Housing',
+                date: d(2),
+            },
+            {
+                user_id: userId,
+                description: 'Internet — Fiber 1Gbps',
+                amount: 65,
+                type: 'expense',
+                category: 'Utilities',
+                date: d(4),
+            },
+            {
+                user_id: userId,
+                description: 'Electricity Bill',
+                amount: 88,
+                type: 'expense',
+                category: 'Utilities',
+                date: d(5),
+            },
+
+            // Food & Drink
+            {
+                user_id: userId,
+                description: 'Whole Foods Weekly Shop',
+                amount: 145,
+                type: 'expense',
+                category: 'Food & Drink',
+                date: d(1),
+            },
+            {
+                user_id: userId,
+                description: 'Team Lunch — Client Meeting',
+                amount: 68,
+                type: 'expense',
+                category: 'Food & Drink',
+                date: d(3),
+            },
+            {
+                user_id: userId,
+                description: 'Grocery Run — Fresh Produce',
+                amount: 54,
+                type: 'expense',
+                category: 'Food & Drink',
+                date: d(7),
+            },
+            {
+                user_id: userId,
+                description: 'Meal Prep Ingredients',
+                amount: 92,
+                type: 'expense',
+                category: 'Food & Drink',
+                date: d(10),
+            },
+            {
+                user_id: userId,
+                description: 'Coffee — Monthly Subscription (Nespresso)',
+                amount: 39,
+                type: 'expense',
+                category: 'Food & Drink',
+                date: d(14),
+            },
+
+            // Health
+            {
+                user_id: userId,
+                description: 'Premium Gym Membership',
+                amount: 75,
+                type: 'expense',
+                category: 'Health',
+                date: d(5),
+            },
+            {
+                user_id: userId,
+                description: 'Protein Powder & Supplements (Monthly)',
+                amount: 85,
+                type: 'expense',
+                category: 'Health',
+                date: d(9),
+            },
+            {
+                user_id: userId,
+                description: 'Annual Physical Checkup',
+                amount: 120,
+                type: 'expense',
+                category: 'Health',
+                date: d(20),
+            },
+
+            // Transport
+            {
+                user_id: userId,
+                description: 'Monthly Transit Pass',
+                amount: 95,
+                type: 'expense',
+                category: 'Transport',
+                date: d(2),
+            },
+            {
+                user_id: userId,
+                description: 'Uber — Office visits (x4)',
+                amount: 48,
+                type: 'expense',
+                category: 'Transport',
+                date: d(6),
+            },
+
+            // Shopping (Tech/Professional)
+            {
+                user_id: userId,
+                description: 'Mechanical Keyboard — Keychron Q6 Pro',
+                amount: 189,
+                type: 'expense',
+                category: 'Shopping',
+                date: d(11),
+            },
+            {
+                user_id: userId,
+                description: 'Standing Desk Mat',
+                amount: 45,
+                type: 'expense',
+                category: 'Shopping',
+                date: d(18),
+            },
+
+            // Entertainment
+            {
+                user_id: userId,
+                description: 'Concert Tickets — Tech Meetup Afterparty',
+                amount: 55,
+                type: 'expense',
+                category: 'Entertainment',
+                date: d(13),
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 3: FINANCE — Budget Limits
+        // ══════════════════════════════════════════════════
+        await supabase.from('budgets').insert([
+            { user_id: userId, category: 'Food & Drink', limit_amount: 450, color: '#f59e0b' },
+            { user_id: userId, category: 'Transport', limit_amount: 180, color: '#00e5ff' },
+            { user_id: userId, category: 'Health', limit_amount: 300, color: '#10b981' },
+            { user_id: userId, category: 'Shopping', limit_amount: 250, color: '#f97316' },
+            { user_id: userId, category: 'Entertainment', limit_amount: 100, color: '#ec4899' },
+            { user_id: userId, category: 'Utilities', limit_amount: 200, color: '#6366f1' },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 3: FINANCE — Savings Goals
+        // ══════════════════════════════════════════════════
+        await supabase.from('savings_goals').insert([
+            {
+                user_id: userId,
+                name: '6-Month Emergency Fund',
+                target_amount: 25000,
+                current_amount: 18400,
+                icon: '🛡️',
+                color: '#10b981',
+                target_date: d(-180),
+            },
+            {
+                user_id: userId,
+                name: 'Mac Studio + Studio Display',
+                target_amount: 5200,
+                current_amount: 3800,
+                icon: '💻',
+                color: '#7c3aed',
+                target_date: d(-45),
+            },
+            {
+                user_id: userId,
+                name: 'Japan + South Korea Trip',
+                target_amount: 8000,
+                current_amount: 2350,
+                icon: '✈️',
+                color: '#00e5ff',
+                target_date: d(-210),
+            },
+            {
+                user_id: userId,
+                name: 'Real Estate Down Payment',
+                target_amount: 50000,
+                current_amount: 9600,
+                icon: '🏠',
+                color: '#f59e0b',
+                target_date: d(-730),
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 3: FINANCE — Subscriptions
+        // ══════════════════════════════════════════════════
+        await supabase.from('subscriptions').insert([
+            {
+                user_id: userId,
+                name: 'GitHub Copilot',
+                amount: 19,
+                billing_cycle: 'monthly',
+                category: 'Other',
+                next_billing: nextBill(8),
+            },
+            {
+                user_id: userId,
+                name: 'AWS Developer Account',
+                amount: 23,
+                billing_cycle: 'monthly',
+                category: 'Utilities',
+                next_billing: nextBill(12),
+            },
+            {
+                user_id: userId,
+                name: 'Figma Professional',
+                amount: 15,
+                billing_cycle: 'monthly',
+                category: 'Other',
+                next_billing: nextBill(5),
+            },
+            {
+                user_id: userId,
+                name: 'Notion Team',
+                amount: 16,
+                billing_cycle: 'monthly',
+                category: 'Other',
+                next_billing: nextBill(18),
+            },
+            {
+                user_id: userId,
+                name: 'Spotify Premium',
+                amount: 11,
+                billing_cycle: 'monthly',
+                category: 'Entertainment',
+                next_billing: nextBill(22),
+            },
+            {
+                user_id: userId,
+                name: 'O\'Reilly Learning Platform',
+                amount: 499,
+                billing_cycle: 'yearly',
+                category: 'Other',
+                next_billing: nextBill(120),
+            },
+            {
+                user_id: userId,
+                name: 'iCloud+ 2TB',
+                amount: 9.99,
+                billing_cycle: 'monthly',
+                category: 'Utilities',
+                next_billing: nextBill(3),
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 4: MENTAL GROWTH — Journal Entries
+        // ══════════════════════════════════════════════════
+        await supabase.from('journal_entries').insert([
+            {
+                user_id: userId,
+                title: 'System design breakthrough — finally clicked',
+                content: `Today I had a genuine engineering insight that felt electric. After weeks of wrestling with our distributed caching architecture, the pattern suddenly clicked during a 90-minute deep work session.
+
+The key insight: we were over-engineering the invalidation layer. By moving to event-driven cache busting (rather than TTL-based), we can reduce cache staleness by ~80% while cutting infrastructure complexity by half.
+
+Wrote up a 3-page technical spec. Team review is tomorrow. Feeling deeply satisfied — this is why I do what I do. The connection between focused work and meaningful progress is undeniable.
+
+Key lesson: the solution was simpler than I thought. Complexity is usually a sign of unclear thinking, not a hard problem.`,
+                created_at: ts(0, 21, 0),
+            },
+            {
+                user_id: userId,
+                title: 'Reflecting on leadership feedback from my 1:1',
+                content: `Hard conversation today. My engineering manager flagged that I sometimes present solutions without fully hearing out the team first. It stung initially — I pride myself on collaboration.
+
+But sitting with it tonight, I can see the blind spot. My speed of thinking can sometimes close down space for others to contribute. I've been optimizing for velocity when I should also optimize for inclusion.
+
+Action plan:
+1. "Yes, and..." rather than "Actually..." when responding to suggestions in meetings
+2. Consciously pause 3 seconds before responding to give ideas room to breathe
+3. Ask at least one clarifying question before offering my own take
+
+Growth is uncomfortable. That's the signal it's real. Grateful for honest feedback from someone who wants me to succeed.`,
+                created_at: ts(2, 22, 15),
+            },
+            {
+                user_id: userId,
+                title: 'Reading "A Philosophy of Software Design" — chapter notes',
+                content: `Finished Ousterhout's chapter on "Deep Modules" tonight. Probably the most impactful 30 pages of software theory I've read this year.
+
+Core argument: the best modules are those with simple interfaces that hide deep, complex implementations. The opposite — "shallow modules" with complex APIs and simple implementations — are the enemy of maintainability.
+
+Applied to our codebase, this explains exactly why our UserService became a nightmare. Its interface reflects its implementation complexity. Good API design hides complexity, it doesn't expose it.
+
+Flagged three places in our codebase to refactor based on this framework. Will bring to next architecture review.
+
+The best investment any engineer can make is 30 minutes a day reading outside their immediate work context.`,
+                created_at: ts(4, 21, 30),
+            },
+            {
+                user_id: userId,
+                title: 'Weekly review — on track, adjustments needed',
+                content: `Week 3 self-assessment:
+
+Wins:
+- Shipped the auth refactor 2 days ahead of schedule
+- Successfully unblocked 2 junior engineers on complex debugging tasks  
+- Maintained deep work schedule 5/5 weekday mornings
+
+Misses:
+- Didn't finish the API documentation I planned (deprioritised for a fire)
+- Skipped one workout (Tuesday — had early stand-up, broke the routine)
+- Spent too much time in Slack instead of async first
+
+Theme for next week: defend the calendar. Time is finite. Every yes is a no to something else. This week I'll time-block focused work as non-negotiable meetings.
+
+Score: 7.5/10. Improvement from last week's 6.8.`,
+                created_at: ts(7, 20, 0),
+            },
+            {
+                user_id: userId,
+                title: 'On the compound effect — 1% better every day',
+                content: `Re-read a section of "Atomic Habits" tonight on the mathematics of marginal gains. 
+
+1% better every day = 37x better in a year. 1% worse every day = nearly zero.
+
+This isn't motivation content — it's mathematics applied to human performance. The question I'm sitting with: where am I getting 1% worse without noticing?
+
+Identified two area:
+1. Reactive email/Slack habits — I'm letting notifications set my agenda instead of my own priorities
+2. Post-dinner screen time is degrading my sleep quality — affecting energy and cognitive clarity the next morning
+
+Making small covenant with myself tonight: Slack off at 7PM. Journal instead.
+
+Small inputs. Long game. Trust the process.`,
+                created_at: ts(11, 21, 45),
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 4: MENTAL GROWTH — Mood Logs
+        // ══════════════════════════════════════════════════
+        await supabase.from('mood_logs').insert([
+            { user_id: userId, mood_value: 5, note: 'Flow state for 3 hours. Best work session of the month.', logged_at: ts(0, 20, 30) },
+            { user_id: userId, mood_value: 4, note: 'Good energy, solid progress on the tech spec.', logged_at: ts(1, 21, 0) },
+            { user_id: userId, mood_value: 3, note: 'Tired after back-to-back meetings. Needed more recovery time.', logged_at: ts(2, 20, 15) },
+            { user_id: userId, mood_value: 5, note: 'Crushed both workouts and a full deep work block. Peak day.', logged_at: ts(3, 21, 30) },
+            { user_id: userId, mood_value: 4, note: 'Calm and focused. Meditation really helped this morning.', logged_at: ts(4, 20, 0) },
+            { user_id: userId, mood_value: 4, note: 'Good creative session — solved a gnarly async bug.', logged_at: ts(5, 21, 0) },
+            { user_id: userId, mood_value: 5, note: 'Best Saturday in a while. Gym, reading, no laptop.', logged_at: ts(6, 19, 30) },
+            { user_id: userId, mood_value: 3, note: 'Slightly off balance. Didn\'t sleep well. Took it easy.', logged_at: ts(8, 20, 45) },
+            { user_id: userId, mood_value: 4, note: 'Productive and connected with the team.', logged_at: ts(9, 21, 0) },
+            { user_id: userId, mood_value: 5, note: 'Huge PR shipped. Team morale is high.', logged_at: ts(10, 20, 0) },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 4: MENTAL GROWTH — Gratitude Entries
+        // ══════════════════════════════════════════════════
+        await supabase.from('gratitude_entries').insert([
+            {
+                user_id: userId,
+                items: [
+                    'A team that trusts me and pushes me to grow',
+                    'The health and energy to train consistently',
+                    'Living in a city with access to world-class resources',
+                ],
+                created_at: ts(0, 7, 30),
+            },
+            {
+                user_id: userId,
+                items: [
+                    'The clarity that comes from morning deep work sessions',
+                    'A mentor who gives honest, actionable feedback',
+                    'Financial stability that lets me invest in growth',
+                ],
+                created_at: ts(1, 7, 15),
+            },
+            {
+                user_id: userId,
+                items: [
+                    'Access to incredible learning resources — books, papers, courses',
+                    'The compound effect showing up in my codebase quality',
+                    'Every hard problem that taught me something lasting',
+                ],
+                created_at: ts(2, 7, 45),
+            },
+            {
+                user_id: userId,
+                items: [
+                    'My consistent morning workout habit — now at 18 days strong',
+                    'Open source contributors who made my work possible',
+                    'A quiet apartment where I can think clearly',
+                ],
+                created_at: ts(4, 7, 0),
+            },
+            {
+                user_id: userId,
+                items: [
+                    'The breakthrough insight on distributed caching today',
+                    'Friends who challenge and inspire me',
+                    'Good coffee that makes mornings worth waking up for',
+                ],
+                created_at: ts(6, 7, 30),
+            },
+        ]);
+
+        // Mental Growth Habits
+        await supabase.from('habits').insert([
+            {
+                user_id: userId,
+                name: 'Morning meditation — 10 min mindfulness',
+                module: 'mental',
+                streak: 17,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5), d(6)],
+            },
+            {
+                user_id: userId,
+                name: 'Evening journal — daily reflection',
+                module: 'mental',
+                streak: 22,
+                completions: [d(0), d(1), d(2), d(3), d(4), d(5), d(6), d(7)],
+            },
+            {
+                user_id: userId,
+                name: 'Daily gratitude practice (3 items)',
+                module: 'mental',
+                streak: 14,
+                completions: [d(0), d(1), d(2), d(3), d(4)],
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // MODULE 5: CAREER — Profile + Milestones + Jobs
+        // ══════════════════════════════════════════════════
+        const { data: careerProfile, error: cpErr } = await supabase
+            .from('career_profiles')
+            .upsert({
+                user_id: userId,
+                current_position: 'Senior Full-Stack Engineer',
+                target_role: 'Staff Engineer / Tech Lead',
+                industry: 'Technology / SaaS',
+                timeline: '18 months',
+                current_skills: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'Redis', 'Docker', 'GraphQL', 'System Design'],
+                target_skills: ['Distributed Systems', 'Technical Leadership', 'Engineering Management', 'Platform Engineering', 'ML/AI Integration'],
+                ai_summary: 'Alex is a highly skilled Full-Stack Engineer with 4 years of hands-on experience building scalable SaaS platforms. The transition to Staff Engineer requires deepening expertise in distributed systems, expanding technical influence across multiple teams, and developing formal mentorship and architectural leadership skills. Current trajectory indicates readiness for a Staff role within 12-18 months with consistent focus.',
+                ai_quick_win: 'Document and present your distributed caching architecture decision this week — this single artifact demonstrates Staff-level thinking and cross-team impact.',
+                skill_gaps: ['Distributed systems architecture at scale', 'Cross-org technical leadership', 'Formal mentorship structure', 'Engineering roadmap planning'],
+            })
+            .select()
+            .single();
+
+        if (!cpErr && careerProfile) {
+            await supabase.from('career_milestones').insert([
+                {
+                    user_id: userId,
+                    title: 'Complete Distributed Systems Course (MIT OpenCourseWare)',
+                    deadline: d(-30),
+                    description: 'Finish MIT 6.824 Distributed Systems. Focus on Raft consensus, Spanner, and MapReduce papers. Take structured notes for team knowledge sharing.',
+                    color: '#7c3aed',
+                    status: 'done',
+                },
+                {
+                    user_id: userId,
+                    title: 'Lead and ship a cross-team technical initiative',
+                    deadline: d(-15),
+                    description: 'Take ownership of the distributed caching architecture project. Collaborate with the Platform and Data teams. Present the technical design document to senior leadership.',
+                    color: '#00e5ff',
+                    status: 'active',
+                },
+                {
+                    user_id: userId,
+                    title: 'Establish a structured mentorship program (2 junior engineers)',
+                    deadline: d(-60),
+                    description: 'Formalize bi-weekly 1:1s with mentees. Create a structured curriculum covering code quality, system design, and career development. Track progress with measurable milestones.',
+                    color: '#10b981',
+                    status: 'upcoming',
+                },
+                {
+                    user_id: userId,
+                    title: 'Publish 2 technical blog posts on engineering blog',
+                    deadline: d(-90),
+                    description: 'Write in-depth technical articles on topics where you have unique expertise (distributed caching, TypeScript performance patterns). Build external technical brand.',
+                    color: '#f59e0b',
+                    status: 'upcoming',
+                },
+                {
+                    user_id: userId,
+                    title: 'Speak at one engineering conference or large internal tech talk',
+                    deadline: d(-120),
+                    description: 'Submit a proposal to a relevant engineering conference (QCon, SREcon, or JSConf). Alternatively, organize a company-wide architecture review. Demonstrates thought leadership.',
+                    color: '#e879f9',
+                    status: 'upcoming',
+                },
+                {
+                    user_id: userId,
+                    title: 'Internal promotion interview preparation',
+                    deadline: d(-150),
+                    description: 'Work with manager on formal Staff Engineer promotion case. Document cross-team impact, system design decisions, and mentorship outcomes. Schedule promo committee meeting.',
+                    color: '#f97316',
+                    status: 'upcoming',
+                },
+            ]);
+        }
+
+        // Job Applications Tracker
+        await supabase.from('job_applications').insert([
+            {
+                user_id: userId,
+                company: 'Stripe',
+                job_role: 'Staff Engineer, Core API Platform',
+                status: 'Interview',
+                salary: '$270K–$340K + equity',
+                notes: 'Round 2 system design interview scheduled for next Thursday. Prepare distributed rate limiting and API versioning scenarios.',
+                color: '#7c3aed',
+            },
+            {
+                user_id: userId,
+                company: 'Linear',
+                job_role: 'Senior Engineer, Infrastructure',
+                status: 'Screening',
+                salary: '$220K–$280K + equity',
+                notes: 'Currently at recruiter screen. Excited about the team — they ship incredibly fast for a small org.',
+                color: '#00e5ff',
+            },
+            {
+                user_id: userId,
+                company: 'Vercel',
+                job_role: 'Senior Software Engineer, Edge Runtime',
+                status: 'Applied',
+                salary: '$200K–$250K',
+                notes: 'Applied via referral from former colleague. Edge computing is a huge growth area — strong strategic fit.',
+                color: '#10b981',
+            },
+            {
+                user_id: userId,
+                company: 'Notion',
+                job_role: 'Tech Lead, Document Infrastructure',
+                status: 'Offer',
+                salary: '$290K total comp',
+                notes: 'Offer received. Comparing total comp and growth trajectory against Stripe. Decision needed by end of month.',
+                color: '#f59e0b',
+            },
+            {
+                user_id: userId,
+                company: 'Figma',
+                job_role: 'Senior Engineer, Multiplayer Engine',
+                status: 'Rejected',
+                salary: '$240K–$310K',
+                notes: 'Rejected after final round. Feedback: strong technical skills but needed more experience with operational systems at scale. Follow up in 12 months.',
+                color: '#ef4444',
+            },
+        ]);
+
+        // ══════════════════════════════════════════════════
+        // NOTIFICATIONS
+        // ══════════════════════════════════════════════════
         await supabase.from('notifications').insert([
-            { user_id: userId, title: '🎯 Goal Crushed!', message: 'You have completed 5 focus sessions this week — new personal record!', type: 'success', is_read: false },
-            { user_id: userId, title: '💡 AI Insight', message: 'Your productivity peaks between 8-11am. Schedule your hardest tasks in this window.', type: 'ai', is_read: false },
-            { user_id: userId, title: '💰 Budget Alert', message: 'Your Food category is at 85% of its monthly limit. Consider adjusting for the remaining days.', type: 'warning', is_read: true },
-            { user_id: userId, title: '🔥 Streak Milestone!', message: 'Your "Read for 30 mins" habit streak just hit 20 days. Incredible consistency!', type: 'success', is_read: false },
+            {
+                user_id: userId,
+                title: '🎯 Milestone Complete!',
+                message: 'You completed the MIT Distributed Systems course. This is a major step toward your Staff Engineer goal.',
+                type: 'success',
+                is_read: false,
+            },
+            {
+                user_id: userId,
+                title: '🔥 21-Day Streak!',
+                message: 'Your "Deep Work Session" habit has hit 21 consecutive days. You have built a formidable professional skill.',
+                type: 'success',
+                is_read: false,
+            },
+            {
+                user_id: userId,
+                title: '💡 AI Career Insight',
+                message: 'Based on your progress, you are on track for a Staff Engineer role 2 months ahead of your original 18-month plan. Prioritise the cross-team project milestone next.',
+                type: 'ai',
+                is_read: false,
+            },
+            {
+                user_id: userId,
+                title: '💰 Savings Milestone',
+                message: 'Your Emergency Fund is now at 73% of target ($18,400 / $25,000). At current savings rate you will fully fund it in 6 weeks.',
+                type: 'success',
+                is_read: true,
+            },
+            {
+                user_id: userId,
+                title: '⚠️ Budget Alert',
+                message: 'Your Shopping budget is at 94% for the month ($234 / $250). Consider holding off on non-essential purchases for the rest of the month.',
+                type: 'warning',
+                is_read: true,
+            },
         ]);
 
+        console.log('[PriMaX] Professional mock data injected successfully for user:', userId);
         return { success: true };
     } catch (err) {
-        console.error('Mock data error:', err);
+        console.error('[PriMaX] Mock data injection error:', err);
         return { error: err.message };
     }
 };
