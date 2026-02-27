@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiZap, FiTarget, FiTrendingUp, FiClock, FiStar,
@@ -16,21 +16,21 @@ import { FiRefreshCw, FiDatabase } from 'react-icons/fi';
 const weeklyScores = [72, 78, 65, 88, 82, 91, 88];
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const lifeDimensions = [
-    { label: 'Mind', pct: 92, color: '#7c3aed', icon: '??' },
-    { label: 'Body', pct: 78, color: '#10b981', icon: '??' },
-    { label: 'Career', pct: 85, color: '#00e5ff', icon: '??' },
-    { label: 'Wealth', pct: 71, color: '#fbbf24', icon: '??' },
-    { label: 'Social', pct: 80, color: '#e879f9', icon: '??' },
-    { label: 'Spirit', pct: 88, color: '#f97316', icon: '?' },
+    { label: 'Mind', pct: 92, color: '#7c3aed', icon: '🧠' },
+    { label: 'Body', pct: 78, color: '#10b981', icon: '💪' },
+    { label: 'Career', pct: 85, color: '#00e5ff', icon: '💼' },
+    { label: 'Wealth', pct: 71, color: '#fbbf24', icon: '💰' },
+    { label: 'Social', pct: 80, color: '#e879f9', icon: '👥' },
+    { label: 'Spirit', pct: 88, color: '#f97316', icon: '✨' },
 ];
 const aiInsights = [
-    { emoji: '??', title: 'Start with your highest priority task', body: 'Research shows starting the day tackling your most important task leads to 38% better productivity. Identify and tackle your #1 item first thing.', color: '#7c3aed', action: 'View Tasks', actionTo: '/app/productivity' },
-    { emoji: '??', title: 'Review your financial health', body: 'Regular spending reviews unlock hidden savings opportunities. Check your income vs expenses dashboard to see where your money is really going this month.', color: '#fbbf24', action: 'Review Finance', actionTo: '/app/finance' },
-    { emoji: '??', title: "Don't break your streak", body: "Consistency is the secret to mastery. Log today's habits and workout to maintain your momentum. Even 10 minutes counts!", color: '#e879f9', action: 'Log Habits', actionTo: '/app/fitness' },
-    { emoji: '??', title: "Reflect on today's wins", body: "Studies show that journaling your wins increases satisfaction by 27% and primes your brain for better performance tomorrow.", color: '#00e5ff', action: 'Open Journal', actionTo: '/app/mental' },
-    { emoji: '??', title: 'Polish your career roadmap', body: "Professionals who update their skill profile monthly get 3x more opportunities. Check your Career hub and add any new skills earned this week.", color: '#10b981', action: 'View Career', actionTo: '/app/career' },
-    { emoji: '?', title: 'Schedule a deep work block', body: "Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now - even one session can move the needle on your most important project.", color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
-    { emoji: '??', title: 'Schedule a deep work block', body: 'Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now � even one session can move the needle on your most important project.', color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
+    { emoji: '🎯', title: 'Start with your highest priority task', body: 'Research shows starting the day tackling your most important task leads to 38% better productivity. Identify and tackle your #1 item first thing.', color: '#7c3aed', action: 'View Tasks', actionTo: '/app/productivity' },
+    { emoji: '💸', title: 'Review your financial health', body: 'Regular spending reviews unlock hidden savings opportunities. Check your income vs expenses dashboard to see where your money is really going this month.', color: '#fbbf24', action: 'Review Finance', actionTo: '/app/finance' },
+    { emoji: '🔥', title: "Don't break your streak", body: "Consistency is the secret to mastery. Log today's habits and workout to maintain your momentum. Even 10 minutes counts!", color: '#e879f9', action: 'Log Habits', actionTo: '/app/fitness' },
+    { emoji: '🧠', title: "Reflect on today's wins", body: "Studies show that journaling your wins increases satisfaction by 27% and primes your brain for better performance tomorrow.", color: '#00e5ff', action: 'Open Journal', actionTo: '/app/mental' },
+    { emoji: '🚀', title: 'Polish your career roadmap', body: "Professionals who update their skill profile monthly get 3x more opportunities. Check your Career hub and add any new skills earned this week.", color: '#10b981', action: 'View Career', actionTo: '/app/career' },
+    { emoji: '⏱', title: 'Schedule a deep work block', body: "Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now - even one session can move the needle on your most important project.", color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
+    { emoji: '⏱️', title: 'Schedule a deep work block', body: 'Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now — even one session can move the needle on your most important project.', color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
 ];
 
 const fadeUp = (delay = 0) => ({
@@ -157,7 +157,7 @@ function WeeklyChart() {
                 <span style={{ fontSize: 12, color: 'var(--text-2)' }}>Weekly average</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#10b981', display: 'flex', alignItems: 'center', gap: 6 }}>
                     {Math.round(weeklyScores.reduce((a, b) => a + b, 0) / weeklyScores.length)} pts
-                    <span style={{ color: '#10b981' }}>? +8 vs last week</span>
+                    <span style={{ color: '#10b981' }}>↑ +8 vs last week</span>
                 </span>
             </div>
         </div>
@@ -175,10 +175,10 @@ export default function CommandCenter() {
     const [growthScore, setGrowthScore] = useState(847);
 
     const overviewStats = [
-        { label: 'Open Tasks', value: moduleStats.openTasks ?? '�', delta: 'Productivity', color: '#7c3aed', icon: <FiTarget />, bg: 'rgba(124,58,237,0.1)', border: 'rgba(124,58,237,0.22)' },
-        { label: 'Habit Streak', value: moduleStats.streak != null ? `${moduleStats.streak}d` : '�', delta: 'days in a row', color: '#fbbf24', icon: <FiZap />, bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.2)' },
-        { label: 'Savings Goals', value: moduleStats.goals ?? '�', delta: 'active goals', color: '#00e5ff', icon: <FiActivity />, bg: 'rgba(0,229,255,0.07)', border: 'rgba(0,229,255,0.18)' },
-        { label: 'Net Balance', value: moduleStats.net ?? '�', delta: 'income � expenses', color: '#10b981', icon: <FiStar />, bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
+        { label: 'Open Tasks', value: moduleStats.openTasks ?? '–', delta: 'Productivity', color: '#7c3aed', icon: <FiTarget />, bg: 'rgba(124,58,237,0.1)', border: 'rgba(124,58,237,0.22)' },
+        { label: 'Habit Streak', value: moduleStats.streak != null ? `${moduleStats.streak}d` : '–', delta: 'days in a row', color: '#fbbf24', icon: <FiZap />, bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.2)' },
+        { label: 'Savings Goals', value: moduleStats.goals ?? '–', delta: 'active goals', color: '#00e5ff', icon: <FiActivity />, bg: 'rgba(0,229,255,0.07)', border: 'rgba(0,229,255,0.18)' },
+        { label: 'Net Balance', value: moduleStats.net ?? '–', delta: 'income – expenses', color: '#10b981', icon: <FiStar />, bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
     ];
 
     const moduleActivity = [
@@ -247,7 +247,7 @@ export default function CommandCenter() {
 
     const hour = currentTime.getHours();
     const greeting = hour < 5 ? 'Good night' : hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-    const greetEmoji = hour < 5 ? '??' : hour < 12 ? '??' : hour < 17 ? '?' : '??';
+    const greetEmoji = hour < 5 ? '🌙' : hour < 12 ? '☀️' : hour < 17 ? '⚡' : '🌙';
     const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'Growth Pioneer';
     const doneCount = tasks.filter(t => t.done).length;
     const dayPct = tasks.length ? Math.round((doneCount / tasks.length) * 100) : 0;
@@ -261,7 +261,7 @@ export default function CommandCenter() {
 
     return (
         <div className="page-shell">
-            {/* -- HERO HEADER -- */}
+            {/* ── HERO HEADER ── */}
             <motion.div {...fadeUp(0)} style={{ marginBottom: 32 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
                     <div>
@@ -273,7 +273,7 @@ export default function CommandCenter() {
                             >
                                 {greetEmoji}
                             </motion.span>
-                            <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 500 }}>{formattedDate} � {formattedTime}</span>
+                            <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 500 }}>{formattedDate} · {formattedTime}</span>
 
                             <motion.button
                                 whileHover={{ scale: 1.05 }}
@@ -295,11 +295,11 @@ export default function CommandCenter() {
                             <span style={{ background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                                 {userName}
                             </span>{' '}
-                            ??
+                            👋
                         </h1>
                         <p style={{ fontSize: 15, color: 'var(--text-2)', marginTop: 10, lineHeight: 1.7 }}>
                             {tasks.length > 0
-                                ? <><strong style={{ color: '#10b981' }}>{doneCount} of {tasks.length}</strong> priority tasks done. {dayPct >= 50 ? "You're crushing it! ??" : "Let's make today count."}</>
+                                ? <><strong style={{ color: '#10b981' }}>{doneCount} of {tasks.length}</strong> priority tasks done. {dayPct >= 50 ? "You're crushing it! 🚀" : "Let's make today count."}</>
                                 : 'Add tasks in Productivity to track your daily progress.'}
                         </p>
                     </div>
@@ -335,7 +335,7 @@ export default function CommandCenter() {
                 </div>
             </motion.div>
 
-            {/* -- STATS ROW -- */}
+            {/* ── STATS ROW ── */}
             <motion.div
                 initial="initial"
                 animate="animate"
@@ -367,7 +367,7 @@ export default function CommandCenter() {
                 ))}
             </motion.div>
 
-            {/* -- MAIN GRID -- */}
+            {/* ── MAIN GRID ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 20, alignItems: 'start' }}>
 
                 {/* LEFT (8 cols) */}
@@ -384,7 +384,7 @@ export default function CommandCenter() {
                                         transition={{ duration: 4, repeat: Infinity }}
                                         style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #7c3aed, #00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, boxShadow: '0 0 16px rgba(124,58,237,0.5)' }}
                                     >
-                                        ??
+                                        🤖
                                     </motion.div>
                                     <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#00e5ff' }}>AI Coach Insight</span>
                                 </div>
@@ -426,7 +426,7 @@ export default function CommandCenter() {
                                                     onClick={dismissInsight}
                                                     style={{ padding: '9px 16px', borderRadius: 12, background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-3)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 5 }}
                                                 >
-                                                    Next insight ?
+                                                    Next insight →
                                                 </motion.button>
                                             </div>
                                         </div>
@@ -448,7 +448,7 @@ export default function CommandCenter() {
                                         onMouseOver={e => { e.currentTarget.style.borderColor = 'rgba(124,58,237,0.4)'; e.currentTarget.style.color = 'var(--text-2)'; }}
                                         onMouseOut={e => { e.currentTarget.style.borderColor = 'rgba(124,58,237,0.2)'; e.currentTarget.style.color = 'var(--text-3)'; }}
                                     >
-                                        No open tasks � go add some in Productivity ?
+                                        No open tasks — go add some in Productivity ✅
                                     </Link>
                                 ) : tasks.map((task, i) => (
                                     <motion.div key={task.id ?? i}
@@ -570,7 +570,7 @@ export default function CommandCenter() {
                                 <div style={{ position: 'absolute', left: 27, top: 6, bottom: 6, width: 1, background: 'rgba(255,255,255,0.05)' }} />
                                 {tasks.length === 0 ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '28px 0', opacity: 0.5 }}>
-                                        <span style={{ fontSize: 32 }}>??</span>
+                                        <span style={{ fontSize: 32 }}>📅</span>
                                         <span style={{ fontSize: 12, color: 'var(--text-2)', textAlign: 'center' }}>Add tasks to build your agenda</span>
                                     </div>
                                 ) : tasks.slice(0, 6).map((item, i) => (
