@@ -97,9 +97,9 @@ function FinanceOverview({ userId }) {
     );
 
     const stats = [
-        { label: 'Total Income', value: `₹${data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
-        { label: 'Total Expenses', value: `₹${data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
-        { label: 'Net Balance', value: `${data.net >= 0 ? '+' : ''}₹${data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
+        { label: 'Total Income', value: `₹{data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
+        { label: 'Total Expenses', value: `₹{data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
+        { label: 'Net Balance', value: `₹{data.net >= 0 ? '+' : ''}₹{data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
         { label: 'Savings Goals', value: data.goals.length, delta: 'active goals', color: '#7c3aed', icon: '🏦', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.2)' },
     ];
 
@@ -134,7 +134,7 @@ function FinanceOverview({ userId }) {
                                     <span style={{ fontSize: 13, color: 'var(--text-1)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <span style={{ fontSize: 16 }}>{CAT_ICONS[cat] || '📦'}</span> {cat}
                                     </span>
-                                    <span style={{ fontSize: 13, fontWeight: 800, color: CAT_COLORS[cat] || '#5a5a80' }}>₹${amt.toFixed(0)}</span>
+                                    <span style={{ fontSize: 13, fontWeight: 800, color: CAT_COLORS[cat] || '#5a5a80' }}>₹{amt.toFixed(0)}</span>
                                 </div>
                                 <div style={{ height: 7, borderRadius: 4, background: 'rgba(255,255,255,0.04)', overflow: 'hidden' }}>
                                     <motion.div
@@ -166,7 +166,7 @@ function FinanceOverview({ userId }) {
                                         <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
                                             style={{ height: '100%', borderRadius: 4, background: 'linear-gradient(90deg, #10b981, #00e5ff)' }} />
                                     </div>
-                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>₹${Number(g.current_amount).toFixed(0)} of ₹${Number(g.target_amount).toFixed(0)}</div>
+                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>₹{Number(g.current_amount).toFixed(0)} of ₹{Number(g.target_amount).toFixed(0)}</div>
                                 </div>
                             );
                         })}
@@ -208,7 +208,7 @@ function Transactions({ userId }) {
                         await supabase.from('notifications').insert({
                             user_id: userId,
                             title: 'Budget Alert!',
-                            message: `Warning: You have exceeded your ${form.category} budget by ₹${(spent - budget.limit_amount).toFixed(2)}.`,
+                            message: `Warning: You have exceeded your ${form.category} budget by ₹₹{(spent - budget.limit_amount).toFixed(2)}.`,
                             type: 'warning'
                         });
                     }
@@ -374,7 +374,7 @@ function Budgets({ userId }) {
                                             </div>
                                             <div>
                                                 <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-1)' }}>{b.category}</div>
-                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>₹${spent.toFixed(0)} / ₹${Number(b.limit_amount).toFixed(0)} this month</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>₹{spent.toFixed(0)} / ₹{Number(b.limit_amount).toFixed(0)} this month</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
@@ -389,7 +389,7 @@ function Budgets({ userId }) {
                                     {over && (
                                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                                             style={{ marginTop: 10, padding: '7px 12px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', fontSize: 12, color: '#f87171', fontWeight: 600 }}>
-                                            ⚠️ Budget exceeded by ₹${(spent - Number(b.limit_amount)).toFixed(0)}
+                                            ⚠️ Budget exceeded by ₹{(spent - Number(b.limit_amount)).toFixed(0)}
                                         </motion.div>
                                     )}
                                 </Card>
@@ -486,7 +486,7 @@ function SavingsGoals({ userId }) {
                                             >{g.icon}</motion.div>
                                             <div>
                                                 <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-1)' }}>{g.name}</div>
-                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Target: ₹${Number(g.target_amount).toFixed(0)}</div>
+                                                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Target: ₹{Number(g.target_amount).toFixed(0)}</div>
                                             </div>
                                         </div>
                                         <button onClick={() => delGoal(g.id)} className="btn-danger" style={{ alignSelf: 'flex-start' }}><FiTrash2 size={13} /></button>
@@ -496,7 +496,7 @@ function SavingsGoals({ userId }) {
                                             style={{ height: '100%', borderRadius: 5, background: 'linear-gradient(90deg, #10b981, #00e5ff)', boxShadow: '0 0 10px rgba(16,185,129,0.4)' }} />
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 14 }}>
-                                        <span style={{ color: 'var(--text-2)' }}>₹${Number(g.current_amount).toFixed(0)} saved</span>
+                                        <span style={{ color: 'var(--text-2)' }}>₹{Number(g.current_amount).toFixed(0)} saved</span>
                                         <span style={{ color: '#10b981', fontWeight: 800 }}>{pct}%</span>
                                     </div>
                                     {!complete && (
@@ -539,7 +539,7 @@ function AIFinanceAdvisor({ userId }) {
         const { data: txs } = await supabase.from('transactions').select('amount,type,category').eq('user_id', userId).limit(20);
         const income = (txs || []).filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
         const expense = (txs || []).filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
-        const ctx = txs?.length ? `Financial snapshot: ₹${income.toFixed(0)} income, ₹${expense.toFixed(0)} expenses, net ₹${(income - expense).toFixed(0)}.` : 'No transaction data yet.';
+        const ctx = txs?.length ? `Financial snapshot: ₹{income.toFixed(0)} income, ₹{expense.toFixed(0)} expenses, net ₹{(income - expense).toFixed(0)}.` : 'No transaction data yet.';
         const { text, error } = await callGemini(`${ctx}\n\nQuestion: "${q}"`, SYSTEM_PROMPTS.finance);
         if (!error && text) {
             setAdvice(text);
