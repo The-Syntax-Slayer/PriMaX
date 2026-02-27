@@ -4,10 +4,10 @@ import { FiArrowRight, FiPlay, FiZap, FiTrendingUp, FiAward, FiTarget } from 're
 import ParticleCanvas from './ParticleCanvas';
 
 const floatingBadges = [
-    { icon: '🧠', label: 'AI-Powered Growth', x: '6%', y: '24%', delay: 0, color: '#7c3aed' },
-    { icon: '📈', label: '+340% Productivity', x: '72%', y: '16%', delay: 0.4, color: '#00e5ff' },
-    { icon: '✨', label: '10M+ Goals Achieved', x: '78%', y: '66%', delay: 0.8, color: '#e879f9' },
-    { icon: '🎯', label: '98% Success Rate', x: '4%', y: '68%', delay: 0.6, color: '#fbbf24' },
+    { icon: '🧠', label: 'AI-Powered Growth', x: '1.5%', y: '30%', delay: 0, color: '#7c3aed' },
+    { icon: '📈', label: '+340% Productivity', x: '80%', y: '18%', delay: 0.4, color: '#00e5ff' },
+    { icon: '✨', label: '10M+ Goals Achieved', x: '80%', y: '60%', delay: 0.8, color: '#e879f9' },
+    { icon: '🎯', label: '98% Success Rate', x: '1.5%', y: '62%', delay: 0.6, color: '#fbbf24' },
 ];
 
 const statRings = [
@@ -85,7 +85,7 @@ export default function Hero() {
                     initial={{ opacity: 0, scale: 0.7, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ delay: 1.4 + b.delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ position: 'absolute', left: b.x, top: b.y, zIndex: 3 }}
+                    style={{ position: 'absolute', left: b.x, top: b.y, zIndex: 1, pointerEvents: 'none' }}
                     className="hero-badge-wrapper"
                 >
                     <motion.div
@@ -112,7 +112,7 @@ export default function Hero() {
 
             {/* ── MAIN CONTENT ── */}
             <motion.div style={{ y, opacity, position: 'relative', zIndex: 2, width: '100%' }}>
-                <div className="container" style={{ textAlign: 'center' }}>
+                <div className="container" style={{ textAlign: 'center', maxWidth: 800, margin: '0 auto', padding: '0 clamp(80px, 20vw, 240px)' }}>
 
                     {/* Badge */}
                     <motion.div

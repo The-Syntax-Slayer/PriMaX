@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiCheckSquare, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiTarget, FiX, FiClock, FiEdit3, FiCheck } from 'react-icons/fi';
 import { supabase } from '../../lib/supabase';
@@ -211,6 +211,8 @@ function FocusTimer() {
     const [secs, setSecs] = useState(MODES[0].mins * 60);
     const [running, setRunning] = useState(false);
     const [sessions, setSessions] = useState(0);
+    const [editingMins, setEditingMins] = useState(false);
+    const [customMins, setCustomMins] = useState('25');
     const { user } = useAuth();
     const intervalRef = useRef(null);
 
