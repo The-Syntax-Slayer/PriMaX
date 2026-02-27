@@ -301,14 +301,43 @@ function AIMindsetCoach({ userId }) {
     const [q, setQ] = useState('');
     const [res, setRes] = useState('');
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (!userId) return;
+        const loadLast = async () => {
+            const { data } = await supabase
+                .from('ai_history')
+                .select('output')
+                .eq('user_id', userId)
+                .eq('module', 'mental')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (data) setRes(data.output);
+        };
+        loadLast();
+    }, [userId]);
+
     const generate = async () => {
         if (!q.trim()) return;
-        setLoading(true); setRes('');
+        setLoading(true);
         const { data: moods } = await supabase.from('mood_logs').select('mood_value').eq('user_id', userId).order('logged_at', { ascending: false }).limit(7);
         const avgMood = moods?.length ? (moods.reduce((s, m) => s + m.mood_value, 0) / moods.length).toFixed(1) : null;
         const ctx = avgMood ? `User's average mood this week: ${avgMood}/5. ` : '';
         const { text, error } = await callGemini(`${ctx}User message: "${q}"`, SYSTEM_PROMPTS.mental);
-        setRes(error ? `⚠️ ${error}` : text); setLoading(false);
+
+        if (!error && text) {
+            setRes(text);
+            await supabase.from('ai_history').insert({
+                user_id: userId,
+                module: 'mental',
+                prompt: q,
+                response: text
+            });
+        } else {
+            setRes(error ? `⚠️ ${error}` : 'Failed to generate guidance');
+        }
+        setLoading(false);
     };
     const prompts = ['I\'m feeling overwhelmed and anxious', 'Help me build more self-discipline', 'How do I stay motivated during hard times?', 'I want to build a morning routine'];
     return (

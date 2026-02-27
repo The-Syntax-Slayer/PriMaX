@@ -426,34 +426,75 @@ function JobTracker({ userId }) {
 /*  RESUME BUILDER (AI-Generated from profile)             */
 /* ═══════════════════════════════════════════════════════ */
 function ResumeBuilder({ profile }) {
+    const { user } = useAuth();
     const [sections, setSections] = useState([]);
     const [editing, setEditing] = useState(null);
     const [generating, setGenerating] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [generated, setGenerated] = useState(false);
+    const [savedResumes, setSavedResumes] = useState([]);
+    const [activeResumeId, setActiveResumeId] = useState(null);
+
+    const fetchResumes = useCallback(async () => {
+        const { data } = await supabase.from('resumes').select('*').eq('user_id', user.id).order('last_edited', { ascending: false });
+        setSavedResumes(data || []);
+        if (data?.length > 0 && !activeResumeId) {
+            setSections(data[0].content_json);
+            setActiveResumeId(data[0].id);
+            setGenerated(true);
+        }
+    }, [user.id, activeResumeId]);
+
+    useEffect(() => { fetchResumes(); }, [fetchResumes]);
 
     const generate = async () => {
         setGenerating(true);
-        const prompt = `Create a professional resume template with the following sections for someone going from ${profile.current_role} to ${profile.target_role} in ${profile.industry}. Return 4 resume sections as JSON array: [{ "id": "section_id", "title": "emoji Section Title", "content": "placeholder content with [[BRACKETS]] for user to fill" }]. Include: Professional Summary, Experience, Technical Skills, Education.`;
+        const prompt = `Create a professional resume template with the following sections for someone going from ${profile.current_position} to ${profile.target_role} in ${profile.industry}. Return 4 resume sections as JSON array: [{ "id": "section_id", "title": "emoji Section Title", "content": "placeholder content with [[BRACKETS]] for user to fill" }]. Include: Professional Summary, Experience, Technical Skills, Education.`;
         const { text } = await callGemini(prompt);
         try {
             const clean = text.replace(/```json|```/g, '').trim();
-            setSections(JSON.parse(clean));
+            const parsed = JSON.parse(clean);
+            setSections(parsed);
+
+            // Auto-save initial version
+            const { data } = await supabase.from('resumes').insert({
+                user_id: user.id,
+                title: `Resume - ${profile.target_role}`,
+                content_json: parsed,
+                template_id: 'modern'
+            }).select().single();
+
+            if (data) {
+                setActiveResumeId(data.id);
+                setSavedResumes(prev => [data, ...prev]);
+            }
             setGenerated(true);
         } catch {
-            setSections([
-                { id: 'summary', title: '📋 Professional Summary', content: `Experienced ${profile.current_role} targeting ${profile.target_role} in ${profile.industry}. Skilled in ${profile.current_skills?.join(', ')}.` },
+            const fallback = [
+                { id: 'summary', title: '📋 Professional Summary', content: `Experienced ${profile.current_position} targeting ${profile.target_role} in ${profile.industry}. Skilled in ${profile.current_skills?.join(', ')}.` },
                 { id: 'experience', title: '💼 Experience', content: '[[Add your work experience here]]' },
                 { id: 'skills', title: '🛠️ Technical Skills', content: profile.current_skills?.join(' · ') || '[[Add your skills]]' },
                 { id: 'education', title: '🎓 Education', content: '[[Add your education]]' },
-            ]);
+            ];
+            setSections(fallback);
             setGenerated(true);
         }
         setGenerating(false);
     };
 
+    const saveChanges = async () => {
+        if (!activeResumeId) return;
+        setSaving(true);
+        await supabase.from('resumes').update({
+            content_json: sections,
+            last_edited: new Date().toISOString()
+        }).eq('id', activeResumeId);
+        setSaving(false);
+    };
+
     const enhanceSection = async (secId) => {
         const sec = sections.find(s => s.id === secId);
-        const prompt = `Enhance this resume section for a ${profile.current_role} aiming for ${profile.target_role}:\n\n${sec.title}\n${sec.content}\n\nMake it ATS-optimized, use strong action verbs, quantify achievements where possible. Return only the enhanced content, no title.`;
+        const prompt = `Enhance this resume section for a ${profile.current_position} aiming for ${profile.target_role}:\n\n${sec.title}\n${sec.content}\n\nMake it ATS-optimized, use strong action verbs, quantify achievements where possible. Return only the enhanced content, no title.`;
         const { text } = await callGemini(prompt, SYSTEM_PROMPTS.career);
         setSections(ss => ss.map(s => s.id === secId ? { ...s, content: text } : s));
     };
@@ -473,7 +514,49 @@ function ResumeBuilder({ profile }) {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>✍️ Editor</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>✍️ Editor</span>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                        {savedResumes.length > 0 && (
+                            <select
+                                value={activeResumeId || ''}
+                                onChange={(e) => {
+                                    const res = savedResumes.find(r => r.id === e.target.value);
+                                    if (res) {
+                                        setActiveResumeId(res.id);
+                                        setSections(res.content_json);
+                                    }
+                                }}
+                                className="app-select"
+                                style={{ fontSize: 11, padding: '4px 8px' }}
+                            >
+                                {savedResumes.map(r => <option key={r.id} value={r.id}>{r.title}</option>)}
+                            </select>
+                        )}
+                        <button onClick={saveChanges} disabled={saving} style={{ fontSize: 11, padding: '4px 12px', borderRadius: 6, background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.3)', color: '#7c3aed', fontWeight: 700, cursor: 'pointer' }}>
+                            {saving ? 'Saving...' : 'Save'}
+                        </button>
+                        <button onClick={() => window.print()} style={{ fontSize: 11, padding: '4px 12px', borderRadius: 6, background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)', color: '#00f5ff', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <FiDownload size={10} /> PDF
+                        </button>
+                    </div>
+                </div>
+
+                {/* Print styles */}
+                <style>{`
+                    @media print {
+                        body * { visibility: hidden; background: white !important; }
+                        .resume-preview-section, .resume-preview-section * { visibility: visible; }
+                        .resume-preview-section { 
+                            position: fixed; left: 0; top: 0; width: 100% !important; height: auto !important; 
+                            max-height: none !important; border: none !important; padding: 40px !important;
+                            background: white !important; color: black !important;
+                        }
+                        .resume-preview-section pre { color: #333 !important; font-size: 11pt !important; line-height: 1.5 !important; }
+                        .resume-preview-section div { color: #000 !important; }
+                        .sidebar, .top-bar, .app-bg-canvas, .no-print { display: none !important; }
+                    }
+                `}</style>
                 {sections.map(sec => (
                     <Card key={sec.id} style={{ padding: 16 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -491,7 +574,7 @@ function ResumeBuilder({ profile }) {
                     </Card>
                 ))}
             </div>
-            <Card style={{ background: '#0e0e28', border: '1px solid rgba(124,58,237,0.2)', position: 'sticky', top: 20, alignSelf: 'start', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
+            <Card className="resume-preview-section" style={{ background: '#0e0e28', border: '1px solid rgba(124,58,237,0.2)', position: 'sticky', top: 20, alignSelf: 'start', maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#00f5ff', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 18 }}>Live Preview</div>
                 <div style={{ textAlign: 'center', marginBottom: 16, paddingBottom: 14, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ fontSize: 20, fontWeight: 900, color: '#f0f0ff' }}>{profile.target_role}</div>
@@ -535,7 +618,17 @@ function InterviewPrep({ profile }) {
             `Interview question (${q.category}, ${q.difficulty}): "${q.q}"\n\nCandidate's answer: "${userAnswer}"\n\nEvaluate and provide: 1) Score /10 2) Strengths 3) Improvements 4) Model answer. Use emojis. Under 250 words.`,
             SYSTEM_PROMPTS.career
         );
-        setFeedback(error ? `⚠️ ${error}` : text);
+        if (!error && text) {
+            setFeedback(text);
+            await supabase.from('ai_history').insert({
+                user_id: profile.user_id,
+                module: 'career',
+                prompt: `Interview Feedback: ${q.q}`,
+                response: text
+            });
+        } else {
+            setFeedback(error ? `⚠️ ${error}` : '');
+        }
         setLoading(false);
     };
 
@@ -614,9 +707,19 @@ function AICareerCoach({ profile }) {
     const generate = async () => {
         if (!q.trim()) return;
         setLoading(true); setPlan('');
-        const context = `User profile: ${profile.current_role} → ${profile.target_role} in ${profile.industry}. Timeline: ${profile.timeline}. Skills: ${profile.current_skills?.join(', ')}.`;
+        const context = `User profile: ${profile.current_position} → ${profile.target_role} in ${profile.industry}. Timeline: ${profile.timeline}. Skills: ${profile.current_skills?.join(', ')}.`;
         const { text, error } = await callGemini(`${context}\n\nCareer question: "${q}"`, SYSTEM_PROMPTS.career);
-        setPlan(error ? `⚠️ ${error}` : text);
+        if (!error && text) {
+            setPlan(text);
+            await supabase.from('ai_history').insert({
+                user_id: profile.user_id,
+                module: 'career',
+                prompt: q,
+                response: text
+            });
+        } else {
+            setPlan(error ? `⚠️ ${error}` : '');
+        }
         setLoading(false);
     };
 

@@ -3,8 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiSettings, FiUser, FiBell, FiShield, FiMonitor, FiSave,
     FiCheck, FiDownload, FiTrash2, FiLock, FiAlertTriangle, FiX,
-    FiMail, FiGlobe,
+    FiMail, FiGlobe, FiCamera, FiEdit3
 } from 'react-icons/fi';
+import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 
@@ -80,22 +81,51 @@ export default function Settings() {
 
 /* ── Profile Tab ─────────────────────────────────── */
 function ProfileTab({ user }) {
-    const [form, setForm] = useState({ full_name: '', primary_goal: '', focus_areas: [] });
+    const [form, setForm] = useState({ full_name: '', primary_goal: '', bio: '', avatar_url: '', focus_areas: [] });
     const [status, setStatus] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const FOCUS = ['Career', 'Finance', 'Fitness', 'Mental Growth', 'Productivity'];
 
     useEffect(() => {
         if (!user) return;
-        supabase.from('profiles').select('full_name,primary_goal,focus_areas').eq('id', user.id).maybeSingle()
-            .then(({ data }) => { if (data) setForm({ full_name: data.full_name || '', primary_goal: data.primary_goal || '', focus_areas: data.focus_areas || [] }); });
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+            .then(({ data }) => {
+                if (data) setForm({
+                    full_name: data.full_name || '',
+                    primary_goal: data.primary_goal || '',
+                    bio: data.bio || '',
+                    avatar_url: data.avatar_url || '',
+                    focus_areas: data.focus_areas || []
+                });
+            });
     }, [user]);
+
+    const uploadAvatar = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setUploading(true);
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+        if (uploadError) {
+            setStatus({ type: 'error', msg: 'Upload failed: ' + uploadError.message });
+            setUploading(false);
+            return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+        setForm(f => ({ ...f, avatar_url: publicUrl }));
+        setUploading(false);
+        setStatus({ type: 'success', msg: 'Avatar uploaded! Click Save to confirm.' });
+    };
 
     const save = async () => {
         setSaving(true); setStatus(null);
         const { error } = await supabase.from('profiles').upsert({ id: user.id, ...form, updated_at: new Date().toISOString() });
-        // Also update auth meta
-        await supabase.auth.updateUser({ data: { full_name: form.full_name } });
+        await supabase.auth.updateUser({ data: { full_name: form.full_name, avatar_url: form.avatar_url } });
         setStatus(error ? { type: 'error', msg: error.message } : { type: 'success', msg: 'Profile saved successfully.' });
         setSaving(false);
     };
@@ -115,32 +145,49 @@ function ProfileTab({ user }) {
             <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 22 }}>Your personal information and growth preferences.</p>
             {status && <StatusPill type={status.type} msg={status.msg} />}
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, padding: 16, borderRadius: 14, background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)' }}>
-                <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00f5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 900, color: 'white', flexShrink: 0 }}>
-                    {(form.full_name || user?.email || 'U').charAt(0).toUpperCase()}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 28, padding: '20px', borderRadius: 18, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--app-border)' }}>
+                <div style={{ position: 'relative' }}>
+                    <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00f5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900, color: 'white', flexShrink: 0, overflow: 'hidden', border: '3px solid rgba(124,58,237,0.3)' }}>
+                        {form.avatar_url ? (
+                            <img src={form.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            (form.full_name || user?.email || 'U').charAt(0).toUpperCase()
+                        )}
+                    </div>
+                    <label style={{ position: 'absolute', bottom: -4, right: -4, width: 32, height: 32, borderRadius: '50%', background: 'var(--app-surface-solid)', border: '1px solid var(--app-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00f5ff', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>
+                        <FiCamera size={14} />
+                        <input type="file" onChange={uploadAvatar} style={{ display: 'none' }} accept="image/*" disabled={uploading} />
+                    </label>
                 </div>
                 <div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-1)' }}>{form.full_name || 'Your Name'}</div>
-                    <div style={{ fontSize: 13, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6 }}><FiMail size={11} /> {user?.email}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1)' }}>{form.full_name || 'Your Name'}</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}><FiMail size={11} /> {user?.email}</div>
                 </div>
             </div>
 
-            <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Full Name</label>
-                <input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} placeholder="Your full name" style={inputStyle} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20 }}>
+                <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Full Name</label>
+                    <input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} placeholder="Your full name" style={inputStyle} />
+                </div>
+                <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Primary Goal</label>
+                    <input value={form.primary_goal} onChange={e => setForm(f => ({ ...f, primary_goal: e.target.value }))} placeholder="e.g. Master React and AI integration" style={inputStyle} />
+                </div>
             </div>
-            <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Primary Goal</label>
-                <input value={form.primary_goal} onChange={e => setForm(f => ({ ...f, primary_goal: e.target.value }))} placeholder="e.g. Get promoted to Senior Engineer by end of year" style={inputStyle} />
-                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>Used to personalise AI recommendations across all modules.</div>
-            </div>
+
             <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Focus Areas</label>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Bio / Philosophy</label>
+                <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} placeholder="Tell us about yourself..." style={{ ...inputStyle, minHeight: 80, resize: 'vertical' }} />
+            </div>
+
+            <div style={{ marginBottom: 28 }}>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Focus Areas</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                     {FOCUS.map(area => (
                         <button key={area} onClick={() => toggleFocus(area)}
-                            style={{ padding: '7px 16px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', border: form.focus_areas.includes(area) ? '1px solid rgba(124,58,237,0.5)' : '1px solid var(--app-border)', background: form.focus_areas.includes(area) ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.03)', color: form.focus_areas.includes(area) ? '#f0f0ff' : 'var(--text-3)', transition: 'all 0.2s' }}>
-                            {form.focus_areas.includes(area) ? '✓ ' : ''}{area}
+                            style={{ padding: '8px 18px', borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', border: form.focus_areas.includes(area) ? '1px solid #7c3aed' : '1px solid var(--app-border)', background: form.focus_areas.includes(area) ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)', color: form.focus_areas.includes(area) ? '#7c3aed' : 'var(--text-3)', transition: 'all 0.2s' }}>
+                            {area}
                         </button>
                     ))}
                 </div>
@@ -155,17 +202,26 @@ function ProfileTab({ user }) {
 
 /* ── Appearance Tab ─────────────────────────────── */
 function AppearanceTab() {
+    const { theme, setTheme } = useTheme();
     const [accentColor, setAccentColor] = useState(localStorage.getItem('accent') || '#7c3aed');
-    const [fontSize, setFontSize] = useState(localStorage.getItem('font_size') || 'medium');
     const [saved, setSaved] = useState(false);
 
-    const ACCENTS = ['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#f97316'];
-    const SIZES = [{ id: 'small', label: 'Small' }, { id: 'medium', label: 'Medium' }, { id: 'large', label: 'Large' }];
+    const ACCENTS = [
+        { name: 'Hyper Bloom', hex: '#7c3aed', rgb: '124, 58, 237' },
+        { name: 'Neon Ocean', hex: '#3b82f6', rgb: '59, 130, 246' },
+        { name: 'Emerald City', hex: '#10b981', rgb: '16, 185, 129' },
+        { name: 'Cyber Amber', hex: '#f59e0b', rgb: '245, 158, 11' },
+        { name: 'Future Pink', hex: '#ec4899', rgb: '236, 72, 153' },
+        { name: 'Solar Flare', hex: '#f97316', rgb: '249, 115, 22' },
+    ];
 
-    const save = () => {
-        localStorage.setItem('accent', accentColor);
-        localStorage.setItem('font_size', fontSize);
-        document.documentElement.style.setProperty('--accent', accentColor);
+    const save = (colorObj) => {
+        const c = colorObj || ACCENTS.find(a => a.hex === accentColor);
+        localStorage.setItem('accent', c.hex);
+        localStorage.setItem('accent_rgb', c.rgb);
+        document.documentElement.style.setProperty('--accent', c.hex);
+        document.documentElement.style.setProperty('--accent-rgb', c.rgb);
+        setAccentColor(c.hex);
         setSaved(true); setTimeout(() => setSaved(false), 2000);
     };
 
@@ -175,43 +231,36 @@ function AppearanceTab() {
             <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 22 }}>Customise how PriMaX Hub looks and feels.</p>
 
             <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Theme</label>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Base Theme</label>
                 <div style={{ display: 'flex', gap: 10 }}>
-                    {[{ id: 'dark', label: '🌙 Dark', active: true }, { id: 'light', label: '☀️ Light', active: false }].map(t => (
-                        <button key={t.id} disabled={!t.active}
-                            style={{ padding: '10px 20px', borderRadius: 10, background: t.active ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.03)', border: t.active ? '1px solid rgba(124,58,237,0.4)' : '1px solid var(--app-border)', color: t.active ? '#f0f0ff' : 'var(--text-3)', fontSize: 13, fontWeight: 700, cursor: t.active ? 'pointer' : 'not-allowed', fontFamily: 'Inter, sans-serif', opacity: t.active ? 1 : 0.4 }}>
-                            {t.label} {!t.active && '(coming soon)'}
+                    {[
+                        { id: 'dark', label: '🌙 Midnight', active: theme === 'dark' },
+                        { id: 'light', label: '☀️ Daybreak', active: theme === 'light' }
+                    ].map(t => (
+                        <button key={t.id} onClick={() => setTheme(t.id)}
+                            style={{ padding: '12px 24px', borderRadius: 12, background: t.active ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.02)', border: t.active ? '1px solid #7c3aed' : '1px solid var(--app-border)', color: t.active ? 'var(--text-1)' : 'var(--text-3)', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.2s' }}>
+                            {t.label}
                         </button>
-                    ))}
-                </div>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Accent Colour</label>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    {ACCENTS.map(c => (
-                        <button key={c} onClick={() => setAccentColor(c)}
-                            style={{ width: 36, height: 36, borderRadius: '50%', background: c, border: accentColor === c ? '2px solid white' : '2px solid transparent', cursor: 'pointer', outline: accentColor === c ? `3px solid ${c}` : 'none', outlineOffset: 2, transition: 'all 0.2s' }} />
                     ))}
                 </div>
             </div>
 
             <div style={{ marginBottom: 28 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Interface Density</label>
-                <div style={{ display: 'flex', gap: 8 }}>
-                    {SIZES.map(s => (
-                        <button key={s.id} onClick={() => setFontSize(s.id)}
-                            style={{ padding: '9px 18px', borderRadius: 10, background: fontSize === s.id ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.03)', border: fontSize === s.id ? '1px solid rgba(124,58,237,0.4)' : '1px solid var(--app-border)', color: fontSize === s.id ? '#f0f0ff' : 'var(--text-3)', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.2s' }}>
-                            {s.label}
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Accent Atmosphere</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                    {ACCENTS.map(c => (
+                        <button key={c.hex} onClick={() => save(c)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px', borderRadius: 12, background: accentColor === c.hex ? 'rgba(255,255,255,0.05)' : 'transparent', border: accentColor === c.hex ? `1px solid ${c.hex}` : '1px solid var(--app-border)', cursor: 'pointer', transition: 'all 0.2s', textAlign: 'left' }}>
+                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: c.hex, boxShadow: `0 0 10px ${c.hex}50` }} />
+                            <span style={{ fontSize: 12, fontWeight: 600, color: accentColor === c.hex ? 'var(--text-1)' : 'var(--text-3)' }}>{c.name}</span>
                         </button>
                     ))}
                 </div>
             </div>
 
-            <button onClick={save}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', borderRadius: 12, background: 'linear-gradient(135deg,#7c3aed,#00f5ff)', border: 'none', color: 'white', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                {saved ? <><FiCheck size={14} /> Saved!</> : <><FiSave size={14} /> Apply Changes</>}
-            </button>
+            <div style={{ padding: '16px', borderRadius: 12, background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.12)', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
+                💡 Choice of theme and accent atmosphere is instantly applied across all modules of the platform.
+            </div>
         </div>
     );
 }

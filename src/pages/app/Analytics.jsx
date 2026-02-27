@@ -61,8 +61,7 @@ export default function Analytics() {
         if (!user) return;
         (async () => {
             const today = new Date().toISOString().split('T')[0];
-            const thisMonth = today.substring(0, 7);
-            const [taskRes, habitRes, goalRes, txRes, workoutRes, journalRes, moodRes, gratRes] = await Promise.all([
+            const [taskRes, habitRes, goalRes, txRes, workoutRes, journalRes, moodRes, gratRes, focusRes, resumeRes] = await Promise.all([
                 supabase.from('tasks').select('status,priority,created_at').eq('user_id', user.id),
                 supabase.from('habits').select('streak,completions,name').eq('user_id', user.id),
                 supabase.from('savings_goals').select('name,target_amount,current_amount').eq('user_id', user.id),
@@ -71,6 +70,8 @@ export default function Analytics() {
                 supabase.from('journal_entries').select('id,created_at').eq('user_id', user.id),
                 supabase.from('mood_logs').select('mood_value,logged_at').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(30),
                 supabase.from('gratitude_entries').select('id').eq('user_id', user.id),
+                supabase.from('focus_sessions').select('duration_minutes').eq('user_id', user.id),
+                supabase.from('resumes').select('id').eq('user_id', user.id),
             ]);
 
             const tasks = taskRes.data || [];
@@ -81,18 +82,26 @@ export default function Analytics() {
             const journals = journalRes.data || [];
             const moods = moodRes.data || [];
             const gratitude = gratRes.data || [];
+            const focus = focusRes.data || [];
+            const resumes = resumeRes.data || [];
 
             // Scores (0-100 each)
             const doneRatio = tasks.length ? tasks.filter(t => t.status === 'done').length / tasks.length : 0;
-            const productivityScore = Math.round(Math.min(100, doneRatio * 60 + habits.length * 5 + Math.min(habits.reduce((s, h) => s + (h.streak || 0), 0) / 10, 40)));
+            const focusMins = focus.reduce((s, f) => s + (f.duration_minutes || 0), 0);
+            const productivityScore = Math.round(Math.min(100, doneRatio * 50 + habits.length * 5 + Math.min(focusMins / 60, 20) + Math.min(habits.reduce((s, h) => s + (h.streak || 0), 0) / 10, 20)));
+
             const income = txs.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0);
             const expense = txs.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0);
             const savingsRate = income > 0 ? Math.max(0, (income - expense) / income) : 0;
             const financeScore = Math.round(Math.min(100, savingsRate * 60 + goals.length * 8 + (txs.length > 0 ? 20 : 0)));
+
             const fitnessScore = Math.round(Math.min(100, workouts.length * 6 + habits.filter(h => h.streak > 0).length * 5));
+
+            const careerScore = Math.round(Math.min(100, resumes.length * 25 + (tasks.some(t => t.priority === 'high' && t.status === 'done') ? 30 : 0)));
+
             const avgMood = moods.length ? moods.reduce((s, m) => s + m.mood_value, 0) / moods.length : 0;
             const mentalScore = Math.round(Math.min(100, avgMood * 12 + journals.length * 3 + gratitude.length * 4));
-            const overallScore = Math.round((productivityScore + financeScore + fitnessScore + mentalScore) / 4);
+            const overallScore = Math.round((productivityScore + financeScore + fitnessScore + mentalScore + careerScore) / 5);
 
             // Workout types breakdown
             const workoutTypes = {};
@@ -106,14 +115,31 @@ export default function Analytics() {
             const moodTrend = moods.slice(0, 7).reverse();
 
             setStats({
-                overallScore, productivityScore, financeScore, fitnessScore, mentalScore,
+                overallScore, productivityScore, financeScore, fitnessScore, mentalScore, careerScore,
                 tasks: { total: tasks.length, done: tasks.filter(t => t.status === 'done').length, open: tasks.filter(t => t.status !== 'done').length },
                 habits: { total: habits.length, maxStreak: habits.length ? Math.max(...habits.map(h => h.streak || 0)) : 0, top: habits.sort((a, b) => (b.streak || 0) - (a.streak || 0)).slice(0, 3) },
                 finance: { income, expense, net: income - expense, catSpend, savingsRate: Math.round(savingsRate * 100), goalsCount: goals.length, goals },
                 fitness: { count: workouts.length, totalMins: workouts.reduce((s, w) => s + (w.duration_minutes || 0), 0), workoutTypes },
                 mental: { journals: journals.length, avgMood: avgMood ? avgMood.toFixed(1) : null, moodTrend, gratitude: gratitude.length },
+                focus: { totalMins: focusMins, sessionCount: focus.length },
+                career: { resumes: resumes.length }
             });
             setLoading(false);
+
+            // Try to load last AI report
+            const { data: reportData } = await supabase
+                .from('ai_history')
+                .select('output')
+                .eq('user_id', user.id)
+                .eq('module', 'analytics')
+                .eq('topic', 'life_report')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (reportData) {
+                // We'll pass this via a callback or effect to AIAnalystTab
+            }
         })();
     }, [user]);
 
@@ -156,6 +182,7 @@ export default function Analytics() {
 function OverviewTab({ stats }) {
     const domains = [
         { label: 'Productivity', score: stats.productivityScore, color: '#7c3aed', icon: <FiZap /> },
+        { label: 'Career', score: stats.careerScore, color: '#fbbf24', icon: <FiBriefcase /> },
         { label: 'Finance', score: stats.financeScore, color: '#10b981', icon: <FiDollarSign /> },
         { label: 'Fitness', score: stats.fitnessScore, color: '#ec4899', icon: <FiHeart /> },
         { label: 'Mental', score: stats.mentalScore, color: '#f59e0b', icon: <FiSun /> },
@@ -397,18 +424,50 @@ function AIAnalystTab({ stats, userId }) {
     const [loading, setLoading] = useState(false);
     const [q, setQ] = useState('');
 
+    useEffect(() => {
+        if (!userId) return;
+        const loadReport = async () => {
+            const { data } = await supabase
+                .from('ai_history')
+                .select('output')
+                .eq('user_id', userId)
+                .eq('module', 'analytics')
+                .eq('topic', 'life_report')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            if (data) setReport(data.output);
+        };
+        loadReport();
+    }, [userId]);
+
     const generateReport = async () => {
-        setLoading(true); setReport('');
+        setLoading(true);
         const ctx = `User's life analytics:
 - Overall Score: ${stats.overallScore}/100
-- Productivity: ${stats.productivityScore}/100 | Tasks done: ${stats.tasks.done}/${stats.tasks.total} | Habit streak: ${stats.habits.maxStreak}d
+- Productivity: ${stats.productivityScore}/100 | Focus: ${stats.focus.totalMins} mins | Tasks done: ${stats.tasks.done}/${stats.tasks.total}
+- Career: ${stats.careerScore}/100 | Resumes: ${stats.career.resumes}
 - Finance: ${stats.financeScore}/100 | Net: $${(stats.finance.net || 0).toFixed(0)} | Savings rate: ${stats.finance.savingsRate}%
 - Fitness: ${stats.fitnessScore}/100 | Workouts: ${stats.fitness.count} | Total minutes: ${stats.fitness.totalMins}
 - Mental: ${stats.mentalScore}/100 | Avg mood: ${stats.mental.avgMood || 'N/A'}/5 | Journal entries: ${stats.mental.journals}
 
 ${q ? `User question: "${q}"` : 'Give a comprehensive life performance analysis. Identify strengths, weakest areas, and 3 top priority actions to improve the overall score. Be specific and motivating.'}`;
+
         const { text, error } = await callGemini(ctx, SYSTEM_PROMPTS.global);
-        setReport(error ? `⚠️ ${error}` : text);
+
+        if (!error && text) {
+            setReport(text);
+            // Persist to Supabase
+            await supabase.from('ai_history').insert({
+                user_id: userId,
+                module: 'analytics',
+                topic: 'life_report',
+                input: q || 'General life report',
+                output: text
+            });
+        } else {
+            setReport(`⚠️ ${error || 'Failed to generate report'}`);
+        }
         setLoading(false);
     };
 

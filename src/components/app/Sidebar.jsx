@@ -1,72 +1,114 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     FiGrid, FiZap, FiBriefcase, FiDollarSign,
     FiHeart, FiSun, FiBarChart2, FiMessageCircle,
     FiSettings, FiChevronLeft, FiChevronRight,
+    FiBell, FiLogOut, FiUser, FiSearch, FiCommand
 } from 'react-icons/fi';
-import '../../app.css';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import ParticleCanvas from '../ParticleCanvas';
+import '../../App.css';
 
 const navSections = [
     {
         label: 'Overview',
         items: [
-            { to: '/app', icon: <FiGrid />, label: 'Command Center', exact: true },
+            { to: '/app/dashboard', icon: <FiGrid />, label: 'Command Center', exact: true },
         ],
     },
     {
         label: 'Growth Modules',
         items: [
-            { to: '/app/productivity', icon: <FiZap />, label: 'Productivity' },
-            { to: '/app/career', icon: <FiBriefcase />, label: 'Career' },
-            { to: '/app/finance', icon: <FiDollarSign />, label: 'Finance' },
-            { to: '/app/fitness', icon: <FiHeart />, label: 'Fitness' },
-            { to: '/app/mental', icon: <FiSun />, label: 'Mental Growth' },
+            { to: '/app/productivity', icon: <FiZap />, label: 'Productivity', color: '#00e5ff' },
+            { to: '/app/career', icon: <FiBriefcase />, label: 'Career', color: '#fbbf24' },
+            { to: '/app/finance', icon: <FiDollarSign />, label: 'Finance', color: '#10b981' },
+            { to: '/app/fitness', icon: <FiHeart />, label: 'Fitness', color: '#e879f9' },
+            { to: '/app/mental', icon: <FiSun />, label: 'Mental Growth', color: '#f97316' },
         ],
     },
     {
         label: 'Intelligence',
         items: [
-            { to: '/app/analytics', icon: <FiBarChart2 />, label: 'Analytics' },
-            { to: '/app/ai', icon: <FiMessageCircle />, label: 'AI Assistant' },
+            { to: '/app/analytics', icon: <FiBarChart2 />, label: 'Analytics', color: '#7c3aed' },
+            { to: '/app/ai', icon: <FiMessageCircle />, label: 'AI Assistant', color: '#00e5ff' },
         ],
     },
     {
         label: 'System',
         items: [
-            { to: '/app/settings', icon: <FiSettings />, label: 'Settings' },
+            { to: '/app/settings', icon: <FiSettings />, label: 'Settings', color: '#8888b8' },
         ],
     },
 ];
 
-const moduleColors = {
-    '/app': '#7c3aed',
-    '/app/productivity': '#00f5ff',
-    '/app/career': '#f59e0b',
-    '/app/finance': '#10b981',
-    '/app/fitness': '#ec4899',
-    '/app/mental': '#f97316',
-    '/app/analytics': '#7c3aed',
-    '/app/ai': '#00f5ff',
-    '/app/settings': '#9898c0',
-};
-
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, onMobileOpen }) {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { user, signOut } = useAuth();
+    const [notifs, setNotifs] = useState([]);
+    const [showNotifs, setShowNotifs] = useState(false);
+    const notifRef = useRef(null);
+
+    const fetchNotifs = useCallback(async () => {
+        if (!user) return;
+        const { data } = await supabase
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+        if (data) setNotifs(data);
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
+        fetchNotifs();
+        const channel = supabase.channel('sidebar-notifs')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, fetchNotifs)
+            .subscribe();
+        return () => supabase.removeChannel(channel);
+    }, [user, fetchNotifs]);
+
+    useEffect(() => {
+        const handleClick = (e) => {
+            if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifs(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const unreadCount = notifs.filter(n => !n.is_read).length;
+    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+    const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
     return (
-        <aside className={`sidebar${collapsed ? ' collapsed' : ''}`}>
+        <aside className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
+            {/* Subtle mini particles for depth */}
+            <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', opacity: 0.4 }}>
+                <ParticleCanvas count={15} speed={0.2} size={1} color="#7c3aed" networking={false} />
+            </div>
+
             {/* Header */}
             <div className="sidebar-header">
-                <div className="sidebar-logo-icon">⚡</div>
+                <motion.div
+                    className="sidebar-logo-icon"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.92 }}
+                    style={{ cursor: 'pointer' }}
+                >
+                    ⚡
+                </motion.div>
                 <AnimatePresence>
                     {!collapsed && (
                         <motion.span
                             className="sidebar-brand"
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: 'auto' }}
-                            exit={{ opacity: 0, width: 0 }}
-                            transition={{ duration: 0.2 }}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.22 }}
                         >
                             PriMaX<span>Hub</span>
                         </motion.span>
@@ -77,15 +119,15 @@ export default function Sidebar({ collapsed, onToggle }) {
             {/* Nav */}
             <nav className="sidebar-nav">
                 {navSections.map((section) => (
-                    <div key={section.label}>
+                    <div key={section.label} style={{ marginBottom: 4 }}>
                         <AnimatePresence>
                             {!collapsed && (
                                 <motion.div
                                     className="sidebar-section-label"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
+                                    initial={{ opacity: 0, x: -8 }}
+                                    animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.15 }}
+                                    transition={{ duration: 0.18 }}
                                 >
                                     {section.label}
                                 </motion.div>
@@ -94,11 +136,9 @@ export default function Sidebar({ collapsed, onToggle }) {
 
                         {section.items.map((item) => {
                             const isActive = item.exact
-                                ? location.pathname === item.to
-                                : location.pathname.startsWith(item.to) && item.to !== '/app';
-                            const exactActive = location.pathname === item.to;
-                            const active = item.exact ? exactActive : isActive || exactActive;
-                            const color = moduleColors[item.to] || '#7c3aed';
+                                ? location.pathname === item.to || location.pathname === '/app' || location.pathname === '/app/'
+                                : location.pathname.startsWith(item.to);
+                            const color = item.color || '#7c3aed';
 
                             return (
                                 <NavLink
@@ -107,24 +147,41 @@ export default function Sidebar({ collapsed, onToggle }) {
                                     end={item.exact}
                                     className={({ isActive: ia }) => `nav-item${ia ? ' active' : ''}`}
                                     title={collapsed ? item.label : ''}
-                                    style={({ isActive: ia }) => ia ? { color: color } : {}}
+                                    style={({ isActive: ia }) => ia ? { color } : {}}
                                 >
-                                    <span className="nav-icon" style={{ color: active ? color : undefined }}>
-                                        {item.icon}
-                                    </span>
-                                    <AnimatePresence>
-                                        {!collapsed && (
-                                            <motion.span
-                                                className="nav-label"
-                                                initial={{ opacity: 0, width: 0 }}
-                                                animate={{ opacity: 1, width: 'auto' }}
-                                                exit={{ opacity: 0, width: 0 }}
-                                                transition={{ duration: 0.2 }}
-                                            >
-                                                {item.label}
-                                            </motion.span>
-                                        )}
-                                    </AnimatePresence>
+                                    {({ isActive: ia }) => (
+                                        <>
+                                            {/* Active background glow */}
+                                            {ia && (
+                                                <motion.div
+                                                    layoutId="activeNavBg"
+                                                    style={{
+                                                        position: 'absolute', inset: 0, borderRadius: 12,
+                                                        background: `linear-gradient(135deg, ${color}18, ${color}08)`,
+                                                        border: `1px solid ${color}28`,
+                                                    }}
+                                                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                                />
+                                            )}
+                                            <span className="nav-icon" style={{ color: ia ? color : undefined, position: 'relative', zIndex: 1 }}>
+                                                {item.icon}
+                                            </span>
+                                            <AnimatePresence>
+                                                {!collapsed && (
+                                                    <motion.span
+                                                        className="nav-label"
+                                                        initial={{ opacity: 0, width: 0 }}
+                                                        animate={{ opacity: 1, width: 'auto' }}
+                                                        exit={{ opacity: 0, width: 0 }}
+                                                        transition={{ duration: 0.22 }}
+                                                        style={{ position: 'relative', zIndex: 1 }}
+                                                    >
+                                                        {item.label}
+                                                    </motion.span>
+                                                )}
+                                            </AnimatePresence>
+                                        </>
+                                    )}
                                 </NavLink>
                             );
                         })}
@@ -132,25 +189,77 @@ export default function Sidebar({ collapsed, onToggle }) {
                 ))}
             </nav>
 
-            {/* Footer — collapse toggle */}
-            <div className="sidebar-footer">
-                <button className="collapse-btn" onClick={onToggle} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-                    <span className="nav-icon">
-                        {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
-                    </span>
-                    <AnimatePresence>
-                        {!collapsed && (
-                            <motion.span
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                style={{ fontSize: 13, whiteSpace: 'nowrap' }}
+            {/* Footer */}
+            <div className="sidebar-footer" style={{ padding: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {/* User Profile & Notifications */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px' }}>
+                        <div style={{ position: 'relative' }} ref={notifRef}>
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => setShowNotifs(!showNotifs)}
+                                style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--app-border)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}
                             >
-                                Collapse sidebar
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </button>
+                                <FiBell size={16} />
+                                {unreadCount > 0 && (
+                                    <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#7c3aed', borderRadius: '50%', border: '1px solid var(--app-bg-2)' }} />
+                                )}
+                            </motion.button>
+
+                            <AnimatePresence>
+                                {showNotifs && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.95, y: -20, x: 10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -20, x: 10 }}
+                                        style={{ position: 'absolute', bottom: 'calc(100% + 12px)', left: 0, width: 260, background: 'var(--app-surface-solid)', border: '1px solid var(--app-border)', borderRadius: 16, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', z_index: 200, padding: '12px' }}
+                                    >
+                                        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-2)', marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            NOTIFICATIONS
+                                            {unreadCount > 0 && <span style={{ fontSize: 10, color: '#7c3aed' }}>{unreadCount} new</span>}
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                            {notifs.length === 0 ? (
+                                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-3)', fontSize: 12 }}>No new notifications</div>
+                                            ) : notifs.map(n => (
+                                                <div key={n.id} style={{ padding: '8px 10px', borderRadius: 8, background: n.is_read ? 'transparent' : 'rgba(124,58,237,0.06)', border: '1px solid transparent' }}>
+                                                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>{n.title}</div>
+                                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{n.message}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }} onClick={() => navigate('/app/settings')}>
+                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: 'white' }}>
+                                {initials}
+                            </div>
+                            {!collapsed && (
+                                <div style={{ overflow: 'hidden' }}>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', whiteSpace: 'nowrap' }}>{userName}</div>
+                                    <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>Premium Plan</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <motion.button
+                        className="collapse-btn"
+                        onClick={onToggle}
+                        title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                        whileHover={{ x: collapsed ? 2 : -2 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <span className="nav-icon">
+                            {collapsed ? <FiChevronRight /> : <FiChevronLeft />}
+                        </span>
+                        {!collapsed && <span style={{ fontSize: 13, fontWeight: 500 }}>Collapse</span>}
+                    </motion.button>
+                </div>
             </div>
         </aside>
     );

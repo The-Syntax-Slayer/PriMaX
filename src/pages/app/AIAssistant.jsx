@@ -56,19 +56,53 @@ export default function AIAssistant() {
     const bottomRef = useRef(null);
 
     useEffect(() => {
-        const newChat = getModel().startChat({
-            history: [],
-            generationConfig: { maxOutputTokens: 512, temperature: 0.85 },
-        });
-        setChat(newChat);
-    }, []);
+        if (!user) return;
+
+        const loadHistory = async () => {
+            const { data, error } = await supabase
+                .from('ai_history')
+                .select('*')
+                .eq('user_id', user.id)
+                .eq('module', 'global')
+                .order('created_at', { ascending: true });
+
+            if (data && data.length > 0) {
+                const historyMsgs = [];
+                data.forEach(h => {
+                    historyMsgs.push({ from: 'user', text: h.input });
+                    historyMsgs.push({ from: 'ai', text: h.output });
+                });
+                setMessages([...initialMessages, ...historyMsgs]);
+
+                // Also update Gemini's internal history
+                const geminiHistory = data.map(h => ([
+                    { role: 'user', parts: [{ text: h.input }] },
+                    { role: 'model', parts: [{ text: h.output }] }
+                ])).flat();
+
+                const newChat = getModel().startChat({
+                    history: geminiHistory,
+                    generationConfig: { maxOutputTokens: 512, temperature: 0.85 },
+                });
+                setChat(newChat);
+            } else {
+                const newChat = getModel().startChat({
+                    history: [],
+                    generationConfig: { maxOutputTokens: 512, temperature: 0.85 },
+                });
+                setChat(newChat);
+            }
+        };
+
+        loadHistory();
+    }, [user]);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages, loading]);
 
     const sendMessage = async (text) => {
-        if (!text.trim() || !chat) return;
+        if (!text.trim() || !chat || !user) return;
         const userMsg = { from: 'user', text };
         setMessages(m => [...m, userMsg]);
         setInput('');
@@ -79,6 +113,16 @@ export default function AIAssistant() {
             const result = await chat.sendMessage(text);
             const aiText = result.response.text();
             setMessages(m => [...m, { from: 'ai', text: aiText }]);
+
+            // Persist to Supabase
+            await supabase.from('ai_history').insert({
+                user_id: user.id,
+                module: 'global',
+                topic: 'chat',
+                input: text,
+                output: aiText
+            });
+
         } catch (err) {
             console.error('Gemini error:', err);
             setError('AI is temporarily unavailable. Please try again.');
@@ -92,7 +136,16 @@ export default function AIAssistant() {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
     };
 
-    const handleNewSession = () => {
+    const handleNewSession = async () => {
+        if (!window.confirm('Clear chat history and start a new session?')) return;
+
+        // Delete history from Supabase for this user (global/chat)
+        await supabase
+            .from('ai_history')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('module', 'global');
+
         const newChat = getModel().startChat({
             history: [],
             generationConfig: { maxOutputTokens: 512, temperature: 0.85 },

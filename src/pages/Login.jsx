@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiMail, FiLock, FiAlertCircle, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../contexts/AuthContext';
-import '../app.css';
+import ParticleCanvas from '../components/ParticleCanvas';
+import '../App.css';
 
 export default function Login() {
     const { signIn, signInWithGoogle } = useAuth();
@@ -34,24 +35,50 @@ export default function Login() {
         setLoading(false);
     };
 
-
     return (
         <div className="auth-page">
-            {/* Decorative orbs */}
-            <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: '#7c3aed', filter: 'blur(100px)', opacity: 0.1, top: '-10%', left: '-10%', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: '#00f5ff', filter: 'blur(100px)', opacity: 0.07, bottom: '-10%', right: '-5%', pointerEvents: 'none' }} />
+            {/* ── PARTICLE BACKGROUND ── */}
+            <ParticleCanvas
+                count={65}
+                networking={true}
+                color="#7c3aed"
+                accent="#00e5ff"
+                speed={0.5}
+                maxDist={120}
+                size={1.6}
+                opacity={0.85}
+            />
 
+            {/* ── GLOW ORBS ── */}
+            <motion.div
+                animate={{ scale: [1, 1.2, 1], opacity: [0.12, 0.2, 0.12] }}
+                transition={{ duration: 8, repeat: Infinity }}
+                style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: '#7c3aed', filter: 'blur(100px)', top: '-15%', left: '-15%', pointerEvents: 'none' }}
+            />
+            <motion.div
+                animate={{ scale: [1, 1.15, 1], opacity: [0.07, 0.13, 0.07] }}
+                transition={{ duration: 10, repeat: Infinity, delay: 3 }}
+                style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: '#00e5ff', filter: 'blur(100px)', bottom: '-10%', right: '-10%', pointerEvents: 'none' }}
+            />
+
+            {/* ── AUTH CARD ── */}
             <motion.div
                 className="auth-card"
-                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                initial={{ opacity: 0, y: 32, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
                 {/* Logo */}
                 <div className="auth-logo">
-                    <div className="auth-logo-icon">⚡</div>
-                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 18, fontWeight: 700, color: '#f0f0ff' }}>
-                        PriMaX<span style={{ color: '#00f5ff' }}>Hub</span>
+                    <motion.div
+                        className="auth-logo-icon"
+                        animate={{ boxShadow: ['0 0 20px rgba(124,58,237,0.5)', '0 0 40px rgba(0,229,255,0.4)', '0 0 20px rgba(124,58,237,0.5)'] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                    >
+                        ⚡
+                    </motion.div>
+                    <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 18, fontWeight: 700, color: '#eeeeff' }}>
+                        PriMaX<span style={{ color: '#00e5ff' }}>Hub</span>
                     </span>
                 </div>
 
@@ -73,8 +100,12 @@ export default function Login() {
 
                 {/* Error */}
                 {error && (
-                    <motion.div className="form-error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', marginBottom: 16 }}>
+                    <motion.div
+                        className="form-error"
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{ padding: '10px 14px', borderRadius: 12, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', marginBottom: 16 }}
+                    >
                         <FiAlertCircle size={14} /> {error}
                     </motion.div>
                 )}
@@ -83,49 +114,41 @@ export default function Login() {
                     <div className="form-group">
                         <label className="form-label">Email address</label>
                         <div style={{ position: 'relative' }}>
-                            <FiMail size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#5a5a80' }} />
-                            <input
-                                className="form-input"
-                                name="email"
-                                type="email"
-                                placeholder="you@example.com"
-                                value={form.email}
-                                onChange={handleChange}
-                                style={{ paddingLeft: 40 }}
-                                autoComplete="email"
-                            />
+                            <FiMail size={15} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#44446a' }} />
+                            <input className="form-input" name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} style={{ paddingLeft: 44 }} autoComplete="email" />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 9 }}>
                             <label className="form-label" style={{ marginBottom: 0 }}>Password</label>
-                            <a href="#" style={{ fontSize: 12, color: '#00f5ff', textDecoration: 'none' }}>Forgot password?</a>
+                            <a href="#" style={{ fontSize: 12, color: '#00e5ff', textDecoration: 'none', fontWeight: 700 }}>Forgot password?</a>
                         </div>
                         <div style={{ position: 'relative' }}>
-                            <FiLock size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#5a5a80' }} />
-                            <input
-                                className="form-input"
-                                name="password"
-                                type={showPass ? 'text' : 'password'}
-                                placeholder="••••••••"
-                                value={form.password}
-                                onChange={handleChange}
-                                style={{ paddingLeft: 40, paddingRight: 44 }}
-                                autoComplete="current-password"
-                            />
+                            <FiLock size={15} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', color: '#44446a' }} />
+                            <input className="form-input" name="password" type={showPass ? 'text' : 'password'} placeholder="••••••••" value={form.password} onChange={handleChange} style={{ paddingLeft: 44, paddingRight: 46 }} autoComplete="current-password" />
                             <button type="button" onClick={() => setShowPass(p => !p)}
-                                style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#5a5a80', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#44446a', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: 4 }}>
                                 {showPass ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                             </button>
                         </div>
                     </div>
 
-                    <button className="btn-auth" type="submit" disabled={loading}>
-                        {loading ? 'Signing in...' : 'Sign In'}
-                    </button>
+                    <motion.button
+                        className="btn-auth"
+                        type="submit"
+                        disabled={loading}
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                    >
+                        {loading ? (
+                            <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                                <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }} style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%' }} />
+                                Signing in...
+                            </span>
+                        ) : 'Sign In'}
+                    </motion.button>
                 </form>
-
 
                 <p className="auth-switch">
                     Don't have an account? <Link to="/signup">Create one free</Link>

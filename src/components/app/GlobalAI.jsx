@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiMessageSquare, FiX, FiSend, FiZap, FiChevronRight, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function GlobalAI() {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [msgs, setMsgs] = useState([
@@ -11,7 +14,33 @@ export default function GlobalAI() {
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
+    const [loadingHistory, setLoadingHistory] = useState(false);
     const chatEndRef = useRef(null);
+
+    // Fetch history
+    useEffect(() => {
+        if (user && isOpen && msgs.length === 1) {
+            (async () => {
+                setLoadingHistory(true);
+                const { data } = await supabase
+                    .from('ai_history')
+                    .select('prompt, response, created_at')
+                    .eq('user_id', user.id)
+                    .eq('module', 'global')
+                    .order('created_at', { ascending: true })
+                    .limit(20);
+
+                if (data && data.length > 0) {
+                    const historical = data.flatMap(d => [
+                        { role: 'user', text: d.prompt },
+                        { role: 'ai', text: d.response }
+                    ]);
+                    setMsgs(p => [...p, ...historical]);
+                }
+                setLoadingHistory(false);
+            })();
+        }
+    }, [user, isOpen]);
 
     useEffect(() => {
         if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -38,10 +67,21 @@ export default function GlobalAI() {
 
         try {
             const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
             const prompt = `You are the PriMaX Hub Global AI, an elite personal assistant. Context: The user is using a productivity, finance, career, and fitness app. Answer concisely, smartly, and use formatting. User: ${userTxt}`;
             const result = await model.generateContent(prompt);
-            setMsgs((p) => [...p, { role: 'ai', text: result.response.text() }]);
+            const aiTxt = result.response.text();
+            setMsgs((p) => [...p, { role: 'ai', text: aiTxt }]);
+
+            // Persist to DB
+            if (user) {
+                await supabase.from('ai_history').insert({
+                    user_id: user.id,
+                    module: 'global',
+                    prompt: userTxt,
+                    response: aiTxt
+                });
+            }
         } catch (e) {
             setMsgs((p) => [...p, { role: 'ai', text: '⚠️ Connection error. Please try again.' }]);
         } finally {
