@@ -70,8 +70,9 @@ function MentalOverview({ userId }) {
                 "I am becoming the best version of myself every single day."
             ];
             const dailyAff = affirmations[new Date().getDate() % affirmations.length];
+            const savedQuotes = JSON.parse(localStorage.getItem('saved_quotes') || '[]');
 
-            setData({ journals: jRes.data || [], recentMoods: moods, avgMood, gratitudeCount: (gRes.data || []).length, dailyAff });
+            setData({ journals: jRes.data || [], recentMoods: moods, avgMood, gratitudeCount: (gRes.data || []).length, dailyAff, savedQuotes });
             setLoading(false);
         })();
     }, [userId]);
@@ -100,12 +101,51 @@ function MentalOverview({ userId }) {
             </div>
 
             {/* Daily Affirmation */}
-            <Card style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(0,229,255,0.08))', border: '1px solid rgba(124,58,237,0.2)', textAlign: 'center' }}>
+            <Card style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(0,229,255,0.08))', border: '1px solid rgba(124,58,237,0.2)', textAlign: 'center', position: 'relative' }}>
                 <div style={{ fontSize: 11, fontWeight: 800, color: '#00e5ff', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 12 }}>✨ DAILY AFFIRMATION</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 16 }}>
                     "{data.dailyAff}"
                 </div>
+                <button
+                    onClick={() => {
+                        const newSaved = [...new Set([...data.savedQuotes, data.dailyAff])];
+                        localStorage.setItem('saved_quotes', JSON.stringify(newSaved));
+                        setData(d => ({ ...d, savedQuotes: newSaved }));
+                    }}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--app-border)', color: 'var(--text-2)', padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                    <FiSave size={12} /> {data.savedQuotes.includes(data.dailyAff) ? 'Saved to Collection' : 'Save to Collection'}
+                </button>
             </Card>
+
+            {/* Saved Quotes Collection */}
+            {data.savedQuotes.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-3)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Saved Wisdom</div>
+                    <div style={{ display: 'flex', overflowX: 'auto', gap: 12, paddingBottom: 8, scrollbarWidth: 'none' }}>
+                        {data.savedQuotes.map((q, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                style={{ flexShrink: 0, width: 200, padding: 14, borderRadius: 12, background: 'var(--app-surface)', border: '1px solid var(--app-border)', fontSize: 11, color: 'var(--text-2)', fontStyle: 'italic', lineHeight: 1.4, position: 'relative' }}
+                            >
+                                "{q}"
+                                <button
+                                    onClick={() => {
+                                        const newSaved = data.savedQuotes.filter((_, idx) => idx !== i);
+                                        localStorage.setItem('saved_quotes', JSON.stringify(newSaved));
+                                        setData(d => ({ ...d, savedQuotes: newSaved }));
+                                    }}
+                                    style={{ position: 'absolute', top: 6, right: 6, background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}
+                                >
+                                    <FiX size={10} />
+                                </button>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            )}
             {data.recentMoods.length > 0 && (
                 <Card style={{ marginBottom: 16 }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>📈 Futuristic Mood Trend</div>
