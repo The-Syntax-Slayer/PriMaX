@@ -5,7 +5,7 @@ import {
     FiGrid, FiZap, FiBriefcase, FiDollarSign,
     FiHeart, FiSun, FiBarChart2, FiMessageCircle,
     FiSettings, FiChevronLeft, FiChevronRight,
-    FiBell, FiLogOut, FiUser, FiSearch, FiCommand
+    FiBell, FiLogOut, FiUser, FiSearch, FiCommand, FiCheck
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
