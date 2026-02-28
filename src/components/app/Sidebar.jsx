@@ -46,6 +46,17 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
     const [showNotifs, setShowNotifs] = useState(false);
     const notifRef = useRef(null);
 
+    const fetchNotifs = useCallback(async () => {
+        if (!user) return;
+        const { data } = await supabase
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+        if (data) setNotifs(data);
+    }, [user]);
+
     const markAsRead = async (id) => {
         const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
         if (!error) fetchNotifs();
