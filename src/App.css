@@ -1183,10 +1183,18 @@
   transition: all 0.22s;
   cursor: pointer;
   -webkit-appearance: none;
+  color-scheme: dark; /* Ensures native dropdown follows dark theme */
+}
+
+.app-select option {
+  background-color: #0d0d2b; /* Explicit dark background */
+  color: #eeeeff; /* Explicit light text */
+  padding: 10px;
 }
 
 .app-select:focus {
   border-color: rgba(124, 58, 237, 0.5);
+  background: rgba(124, 58, 237, 0.04);
 }
 
 /* ========================
