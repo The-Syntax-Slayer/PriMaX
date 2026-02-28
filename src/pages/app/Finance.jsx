@@ -97,9 +97,9 @@ function FinanceOverview({ userId }) {
     );
 
     const stats = [
-        { label: 'Total Income', value: `₹{data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
-        { label: 'Total Expenses', value: `₹{data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
-        { label: 'Net Balance', value: `₹{data.net >= 0 ? '+' : ''}₹{data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
+        { label: 'Total Income', value: `₹${data.income.toFixed(0)}`, delta: '+this period', color: '#10b981', icon: '📈', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
+        { label: 'Total Expenses', value: `₹${data.expense.toFixed(0)}`, delta: 'all categories', color: '#ef4444', icon: '📉', bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.18)' },
+        { label: 'Net Balance', value: `${data.net >= 0 ? '+' : ''}₹${data.net.toFixed(0)}`, delta: data.net >= 0 ? 'Positive' : 'Deficit', color: data.net >= 0 ? '#00e5ff' : '#f59e0b', icon: data.net >= 0 ? '✅' : '⚠️', bg: data.net >= 0 ? 'rgba(0,229,255,0.07)' : 'rgba(245,158,11,0.08)', border: data.net >= 0 ? 'rgba(0,229,255,0.18)' : 'rgba(245,158,11,0.2)' },
         { label: 'Savings Goals', value: data.goals.length, delta: 'active goals', color: '#7c3aed', icon: '🏦', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.2)' },
     ];
 
