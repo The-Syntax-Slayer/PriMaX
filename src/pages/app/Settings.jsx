@@ -149,7 +149,7 @@ function ProfileTab({ user, refreshProfile }) {
         const { error } = await supabase.from('profiles').upsert({ id: user.id, ...form, updated_at: new Date().toISOString() });
 
         if (error) {
-            if (error.message.includes('column') && error.message.includes('not found')) {
+            if ((error.message.includes('column') && (error.message.includes('not found') || error.message.includes('find'))) || error.message.includes('schema cache')) {
                 setStatus({
                     type: 'error',
                     msg: (
@@ -158,13 +158,16 @@ function ProfileTab({ user, refreshProfile }) {
                             <div style={{ fontSize: 12, lineHeight: 1.5 }}>The profile columns (bio, primary_goal, focus_areas) are missing from your Supabase table. Please run this SQL in your <b>Supabase SQL Editor</b>:</div>
                             <pre style={{ background: 'rgba(0,0,0,0.5)', padding: '12px', borderRadius: 8, fontSize: 11, overflowX: 'auto', border: '1px solid rgba(248,113,113,0.3)', color: '#eee', fontFamily: 'JetBrains Mono, monospace' }}>
                                 {`ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS full_name text,
+ADD COLUMN IF NOT EXISTS avatar_url text,
 ADD COLUMN IF NOT EXISTS bio text,
 ADD COLUMN IF NOT EXISTS primary_goal text,
-ADD COLUMN IF NOT EXISTS focus_areas text[];`}
+ADD COLUMN IF NOT EXISTS focus_areas text[],
+ADD COLUMN IF NOT EXISTS updated_at timestamp with time zone;`}
                             </pre>
                             <div style={{ display: 'flex', gap: 10 }}>
                                 <button
-                                    onClick={() => navigator.clipboard.writeText(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio text, ADD COLUMN IF NOT EXISTS primary_goal text, ADD COLUMN IF NOT EXISTS focus_areas text[];`)}
+                                    onClick={() => navigator.clipboard.writeText(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS full_name text, ADD COLUMN IF NOT EXISTS avatar_url text, ADD COLUMN IF NOT EXISTS bio text, ADD COLUMN IF NOT EXISTS primary_goal text, ADD COLUMN IF NOT EXISTS focus_areas text[], ADD COLUMN IF NOT EXISTS updated_at timestamp with time zone;`)}
                                     style={{ background: 'var(--accent)', color: 'white', border: 'none', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.3)' }}
                                 >
                                     Copy SQL Command
@@ -175,6 +178,9 @@ ADD COLUMN IF NOT EXISTS focus_areas text[];`}
                                 >
                                     Open Supabase SQL Editor
                                 </button>
+                            </div>
+                            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 8, fontStyle: 'italic' }}>
+                                Raw Error: {error.message}
                             </div>
                         </div>
                     )
