@@ -10,7 +10,8 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { injectMockData } from '../../lib/mockData';
+import { injectMockData, clearMockData } from '../../lib/mockData';
+
 import { FiRefreshCw, FiDatabase } from 'react-icons/fi';
 
 const weeklyScores = [72, 78, 65, 88, 82, 91, 88];
@@ -173,6 +174,8 @@ export default function CommandCenter() {
     const [moduleStats, setModuleStats] = useState({});
     const [loaded, setLoaded] = useState(false);
     const [growthScore, setGrowthScore] = useState(847);
+    const [isPresentationMode, setIsPresentationMode] = useState(() => localStorage.getItem('primax_demo_mode') === 'true');
+    const [modeLoading, setModeLoading] = useState(false);
 
     const overviewStats = [
         { label: 'Open Tasks', value: moduleStats.openTasks ?? '–', delta: 'Productivity', color: '#7c3aed', icon: <FiTarget />, bg: 'rgba(124,58,237,0.1)', border: 'rgba(124,58,237,0.22)' },
@@ -279,15 +282,53 @@ export default function CommandCenter() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={async () => {
-                                    if (window.confirm('Inject mock data for presentation? This adds demo data to your current account.')) {
-                                        const res = await injectMockData(user.id);
-                                        if (res.success) window.location.reload();
-                                        else alert('Error injecting data: ' + res.error);
+                                    setModeLoading(true);
+                                    if (isPresentationMode) {
+                                        // Switch to Normal Mode
+                                        const res = await clearMockData(user.id);
+                                        if (res.success) {
+                                            localStorage.removeItem('primax_demo_mode');
+                                            setIsPresentationMode(false);
+                                            window.location.reload();
+                                        } else {
+                                            alert('Error clearing demo data: ' + res.error);
+                                        }
+                                    } else {
+                                        // Switch to Presentation Mode
+                                        if (window.confirm('Activate Presentation Mode? This injects demo data into your account for showcasing.')) {
+                                            const res = await injectMockData(user.id);
+                                            if (res.success) {
+                                                localStorage.setItem('primax_demo_mode', 'true');
+                                                setIsPresentationMode(true);
+                                                window.location.reload();
+                                            } else {
+                                                alert('Error injecting data: ' + res.error);
+                                            }
+                                        }
                                     }
+                                    setModeLoading(false);
                                 }}
-                                style={{ marginLeft: 16, background: 'rgba(0,229,255,0.1)', border: '1px solid rgba(0,229,255,0.3)', borderRadius: 100, padding: '4px 12px', fontSize: 10, color: '#00e5ff', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+                                style={{
+                                    marginLeft: 16,
+                                    background: isPresentationMode ? 'rgba(251,191,36,0.15)' : 'rgba(0,229,255,0.1)',
+                                    border: `1px solid ${isPresentationMode ? 'rgba(251,191,36,0.4)' : 'rgba(0,229,255,0.3)'}`,
+                                    borderRadius: 100, padding: '4px 12px', fontSize: 10,
+                                    color: isPresentationMode ? '#fbbf24' : '#00e5ff',
+                                    fontWeight: 800, cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: 6,
+                                    boxShadow: isPresentationMode ? '0 0 12px rgba(251,191,36,0.2)' : 'none',
+                                    transition: 'all 0.3s ease',
+                                    opacity: modeLoading ? 0.6 : 1,
+                                }}
                             >
-                                <FiDatabase size={10} /> Presentation Mode
+                                {modeLoading ? (
+                                    <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.8 }}>
+                                        <FiRefreshCw size={10} />
+                                    </motion.span>
+                                ) : (
+                                    <FiDatabase size={10} />
+                                )}
+                                {modeLoading ? 'Switching...' : isPresentationMode ? '⚡ Normal Mode' : 'Presentation Mode'}
                             </motion.button>
                         </div>
                         <h1 style={{ fontSize: 'clamp(26px, 3.5vw, 42px)', fontWeight: 900, color: 'var(--text-1)', margin: 0, letterSpacing: '-0.025em', lineHeight: 1.1 }}>

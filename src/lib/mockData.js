@@ -898,3 +898,26 @@ Small inputs. Long game. Trust the process.`,
         return { error: err.message };
     }
 };
+
+/**
+ * Clears all mock/demo data for a user, restoring real data only.
+ * Deletes all rows for the user across all tables seeded by injectMockData.
+ */
+export const clearMockData = async (userId) => {
+    if (!userId) return { error: 'No user ID provided' };
+    try {
+        const tables = [
+            'tasks', 'habits', 'journal_entries', 'mood_logs',
+            'workouts', 'transactions', 'savings_goals', 'subscriptions',
+            'gratitude_entries', 'affirmations', 'notifications',
+        ];
+        await Promise.all(tables.map(table =>
+            supabase.from(table).delete().eq('user_id', userId)
+        ));
+        console.log('[PriMaX] Mock data cleared for user:', userId);
+        return { success: true };
+    } catch (err) {
+        console.error('[PriMaX] Clear mock data error:', err);
+        return { error: err.message };
+    }
+};
