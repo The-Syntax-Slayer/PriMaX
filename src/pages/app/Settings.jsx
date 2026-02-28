@@ -140,8 +140,36 @@ function ProfileTab({ user }) {
     const save = async () => {
         setSaving(true); setStatus(null);
         const { error } = await supabase.from('profiles').upsert({ id: user.id, ...form, updated_at: new Date().toISOString() });
-        await supabase.auth.updateUser({ data: { full_name: form.full_name, avatar_url: form.avatar_url } });
-        setStatus(error ? { type: 'error', msg: error.message } : { type: 'success', msg: 'Profile saved successfully.' });
+
+        if (error) {
+            if (error.message.includes('column') && error.message.includes('not found')) {
+                setStatus({
+                    type: 'error',
+                    msg: (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div>⚠️ <b>Database Schema Out of Sync!</b> Please run this SQL in your Supabase SQL Editor:</div>
+                            <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: 6, fontSize: 11, overflowX: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                {`ALTER TABLE profiles 
+ADD COLUMN IF NOT EXISTS bio text,
+ADD COLUMN IF NOT EXISTS primary_goal text,
+ADD COLUMN IF NOT EXISTS focus_areas text[];`}
+                            </pre>
+                            <button
+                                onClick={() => navigator.clipboard.writeText(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio text, ADD COLUMN IF NOT EXISTS primary_goal text, ADD COLUMN IF NOT EXISTS focus_areas text[];`)}
+                                style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--app-border)', color: 'var(--text-2)', padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer' }}
+                            >
+                                Copy SQL Command
+                            </button>
+                        </div>
+                    )
+                });
+            } else {
+                setStatus({ type: 'error', msg: error.message });
+            }
+        } else {
+            await supabase.auth.updateUser({ data: { full_name: form.full_name, avatar_url: form.avatar_url } });
+            setStatus({ type: 'success', msg: 'Profile saved successfully.' });
+        }
         setSaving(false);
     };
 

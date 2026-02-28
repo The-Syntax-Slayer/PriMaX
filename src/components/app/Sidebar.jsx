@@ -46,16 +46,16 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
     const [showNotifs, setShowNotifs] = useState(false);
     const notifRef = useRef(null);
 
-    const fetchNotifs = useCallback(async () => {
+    const markAsRead = async (id) => {
+        const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+        if (!error) fetchNotifs();
+    };
+
+    const markAllAsRead = async () => {
         if (!user) return;
-        const { data } = await supabase
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(5);
-        if (data) setNotifs(data);
-    }, [user]);
+        const { error } = await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
+        if (!error) fetchNotifs();
+    };
 
     useEffect(() => {
         if (!user) return;
@@ -151,7 +151,17 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                             >
                                 <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-2)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', letterSpacing: '0.08em' }}>
                                     NOTIFICATIONS
-                                    {unreadCount > 0 && <span style={{ fontSize: 10, color: '#7c3aed', background: 'rgba(124,58,237,0.1)', padding: '2px 8px', borderRadius: 100 }}>{unreadCount} NEW</span>}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        {unreadCount > 0 && (
+                                            <button
+                                                onClick={markAllAsRead}
+                                                style={{ background: 'none', border: 'none', color: '#7c3aed', fontSize: 10, cursor: 'pointer', padding: '2px 4px', fontWeight: 700 }}
+                                            >
+                                                Mark all read
+                                            </button>
+                                        )}
+                                        {unreadCount > 0 && <span style={{ fontSize: 10, color: '#7c3aed', background: 'rgba(124,58,237,0.1)', padding: '2px 8px', borderRadius: 100 }}>{unreadCount} NEW</span>}
+                                    </div>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
                                     {notifs.length === 0 ? (
@@ -160,9 +170,20 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                                             No new notifications
                                         </div>
                                     ) : notifs.map(n => (
-                                        <div key={n.id} style={{ padding: '10px 12px', borderRadius: 10, background: n.is_read ? 'transparent' : 'rgba(124,58,237,0.04)', border: '1px solid var(--app-border)' }}>
-                                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)' }}>{n.title}</div>
-                                            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4, lineHeight: 1.5 }}>{n.message}</div>
+                                        <div key={n.id} style={{ padding: '10px 12px', borderRadius: 10, background: n.is_read ? 'transparent' : 'rgba(124,58,237,0.04)', border: '1px solid var(--app-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)' }}>{n.title}</div>
+                                                <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4, lineHeight: 1.5 }}>{n.message}</div>
+                                            </div>
+                                            {!n.is_read && (
+                                                <button
+                                                    onClick={() => markAsRead(n.id)}
+                                                    style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(124,58,237,0.1)', border: 'none', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                                                    title="Mark as read"
+                                                >
+                                                    <FiCheck size={12} />
+                                                </button>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
