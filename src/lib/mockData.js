@@ -910,6 +910,8 @@ export const clearMockData = async (userId) => {
             'tasks', 'habits', 'journal_entries', 'mood_logs',
             'workouts', 'transactions', 'savings_goals', 'subscriptions',
             'gratitude_entries', 'affirmations', 'notifications',
+            'focus_sessions', 'budgets', 'career_profiles', 'career_milestones',
+            'job_applications', 'resumes', 'ai_history',
         ];
         await Promise.all(tables.map(table =>
             supabase.from(table).delete().eq('user_id', userId)
