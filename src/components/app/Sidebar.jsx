@@ -41,7 +41,7 @@ const navSections = [
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, onMobileOpen }) {
     const location = useLocation();
     const navigate = useNavigate();
-    const { user, signOut } = useAuth();
+    const { user, profile, signOut } = useAuth();
     const [notifs, setNotifs] = useState([]);
     const [showNotifs, setShowNotifs] = useState(false);
     const notifRef = useRef(null);
@@ -86,8 +86,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
     }, []);
 
     const unreadCount = notifs.filter(n => !n.is_read).length;
-    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+    const userName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
     const initials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+    const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
 
     return (
         <aside className={`sidebar${collapsed ? ' collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
@@ -288,8 +289,15 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)'}
                             onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
                         >
-                            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: 'white', border: '2px solid rgba(255,255,255,0.1)' }}>
-                                {initials}
+                            <div style={{
+                                width: 30, height: 30, borderRadius: '50%',
+                                background: avatarUrl ? `url(${avatarUrl}) center/cover` : 'linear-gradient(135deg,#7c3aed,#00e5ff)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: 11, fontWeight: 900, color: 'white',
+                                border: '2px solid rgba(255,255,255,0.1)',
+                                overflow: 'hidden'
+                            }}>
+                                {!avatarUrl && initials}
                             </div>
                             {!collapsed && (
                                 <div style={{ flex: 1, overflow: 'hidden' }}>

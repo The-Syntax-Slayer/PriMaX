@@ -35,7 +35,7 @@ function StatusPill({ type, msg }) {
 }
 
 export default function Settings() {
-    const { user, signOut } = useAuth();
+    const { user, refreshProfile, signOut } = useAuth();
     const [activeTab, setActiveTab] = useState('profile');
 
     return (
@@ -67,7 +67,7 @@ export default function Settings() {
                 <AnimatePresence mode="wait">
                     <motion.div key={activeTab} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }}
                         style={{ borderRadius: 18, background: 'var(--app-surface)', border: '1px solid var(--app-border)', padding: 28 }}>
-                        {activeTab === 'profile' && <ProfileTab user={user} />}
+                        {activeTab === 'profile' && <ProfileTab user={user} refreshProfile={refreshProfile} />}
                         {activeTab === 'appearance' && <AppearanceTab />}
                         {activeTab === 'notifications' && <NotificationsTab />}
                         {activeTab === 'security' && <SecurityTab user={user} />}
@@ -80,7 +80,7 @@ export default function Settings() {
 }
 
 /* ── Profile Tab ─────────────────────────────────── */
-function ProfileTab({ user }) {
+function ProfileTab({ user, refreshProfile }) {
     const [form, setForm] = useState({ full_name: '', primary_goal: '', bio: '', avatar_url: '', focus_areas: [] });
     const [status, setStatus] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -184,6 +184,7 @@ ADD COLUMN IF NOT EXISTS focus_areas text[];`}
             }
         } else {
             await supabase.auth.updateUser({ data: { full_name: form.full_name, avatar_url: form.avatar_url } });
+            if (refreshProfile) refreshProfile();
             setStatus({ type: 'success', msg: 'Profile saved successfully.' });
         }
         setSaving(false);
