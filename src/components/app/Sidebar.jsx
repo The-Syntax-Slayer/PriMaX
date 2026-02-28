@@ -36,12 +36,6 @@ const navSections = [
             { to: '/app/ai', icon: <FiMessageCircle />, label: 'AI Assistant', color: '#00e5ff' },
         ],
     },
-    {
-        label: 'System',
-        items: [
-            { to: '/app/settings', icon: <FiSettings />, label: 'Settings', color: '#8888b8' },
-        ],
-    },
 ];
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, onMobileOpen }) {
@@ -147,11 +141,12 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                                 animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, y: -10, x: -10 }}
                                 style={{
-                                    position: 'absolute', top: 'calc(100% + 12px)', right: 0,
-                                    width: 280, background: 'var(--app-surface-solid)',
+                                    position: 'absolute', top: 'calc(100% + 12px)', left: 0,
+                                    width: 300, background: 'var(--app-surface-solid)',
                                     border: '1px solid var(--app-border)', borderRadius: 16,
-                                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 1000,
-                                    padding: '16px', backdropFilter: 'blur(20px)'
+                                    boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 20px rgba(124,58,237,0.1)', zIndex: 2000,
+                                    padding: '18px', backdropFilter: 'blur(32px)',
+                                    borderTop: '1px solid rgba(124,58,237,0.3)'
                                 }}
                             >
                                 <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-2)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', letterSpacing: '0.08em' }}>
@@ -266,9 +261,11 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                             </div>
                             {!collapsed && (
                                 <div style={{ flex: 1, overflow: 'hidden' }}>
-                                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', whiteSpace: 'nowrap' }}>{userName}</div>
-                                    <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                        <FiSettings size={10} /> Account Settings
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        {userName} <span style={{ fontSize: 8, background: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#000', padding: '1px 5px', borderRadius: 4, fontWeight: 900 }}>PRO</span>
+                                    </div>
+                                    <div style={{ fontSize: 10, color: '#fbbf24', whiteSpace: 'nowrap', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        PriMaX Pro Plan
                                     </div>
                                 </div>
                             )}

@@ -370,7 +370,6 @@
   flex-direction: column;
   z-index: 100;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
 }
 
 [data-theme='light'] .sidebar {
@@ -398,7 +397,7 @@
   padding: 20px 16px;
   border-bottom: 1px solid var(--app-border);
   min-height: 76px;
-  overflow: hidden;
+  position: relative;
 }
 
 .sidebar-logo-icon {
@@ -1183,12 +1182,15 @@
   transition: all 0.22s;
   cursor: pointer;
   -webkit-appearance: none;
-  color-scheme: dark; /* Ensures native dropdown follows dark theme */
+  color-scheme: dark;
+  /* Ensures native dropdown follows dark theme */
 }
 
 .app-select option {
-  background-color: #0d0d2b; /* Explicit dark background */
-  color: #eeeeff; /* Explicit light text */
+  background-color: #0d0d2b;
+  /* Explicit dark background */
+  color: #eeeeff;
+  /* Explicit light text */
   padding: 10px;
 }
 
