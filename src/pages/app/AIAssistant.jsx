@@ -8,6 +8,72 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// ── MATRIX RAIN COMPONENT ──
+const MatrixRain = () => {
+    const canvasRef = useRef(null);
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+
+        const resize = () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array.from({ length: Math.floor(columns) }).map(() => 1);
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(6, 4, 20, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Using the assistant's purple tone for the matrix
+            ctx.fillStyle = '#7c3aed';
+            ctx.font = `${fontSize}px monospace`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+            animationFrameId = requestAnimationFrame(draw);
+        };
+
+        draw();
+
+        return () => {
+            window.removeEventListener('resize', resize);
+            cancelAnimationFrame(animationFrameId);
+        };
+    }, []);
+
+    return (
+        <canvas
+            ref={canvasRef}
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                opacity: 0.1,
+                zIndex: 0
+            }}
+        />
+    );
+};
+
 // ── Gemini setup (same model as GlobalAI) ──────────────────────────────────
 const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
 
@@ -454,65 +520,70 @@ export default function AIAssistant() {
 
                 {/* Messages area */}
                 <div style={{
-                    flex: 1, overflowY: 'auto', padding: '24px 20px',
-                    display: 'flex', flexDirection: 'column', gap: 18,
-                    scrollbarWidth: 'thin', scrollbarColor: 'rgba(124,58,237,0.2) transparent',
+                    flex: 1, position: 'relative', overflow: 'hidden',
                 }}>
-                    <AnimatePresence initial={false}>
-                        {messages.map((msg, i) => (
-                            <motion.div
-                                key={i}
-                                layout
-                                initial={{ opacity: 0, y: 12 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.28 }}
-                                style={{
-                                    display: 'flex', gap: 10,
-                                    flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-                                    alignItems: 'flex-start',
-                                }}
-                            >
-                                {/* Avatar */}
-                                {msg.role === 'ai' ? (
-                                    <div style={{
-                                        width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                                        background: 'linear-gradient(135deg, #7c3aed, #00e5ff)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        boxShadow: '0 0 14px rgba(124,58,237,0.35)',
-                                    }}>
-                                        <FiZap size={15} color="white" />
-                                    </div>
-                                ) : (
-                                    <div style={{
-                                        width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                                        background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontWeight: 700, fontSize: 13, color: 'white',
-                                    }}>
-                                        {userInitials}
-                                    </div>
-                                )}
+                    <MatrixRain />
+                    <div style={{
+                        position: 'absolute', inset: 0, overflowY: 'auto', padding: '24px 20px',
+                        display: 'flex', flexDirection: 'column', gap: 18, zIndex: 1,
+                        scrollbarWidth: 'thin', scrollbarColor: 'rgba(124,58,237,0.2) transparent',
+                    }}>
+                        <AnimatePresence initial={false}>
+                            {messages.map((msg, i) => (
+                                <motion.div
+                                    key={i}
+                                    layout
+                                    initial={{ opacity: 0, y: 12 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.28 }}
+                                    style={{
+                                        display: 'flex', gap: 10,
+                                        flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
+                                        alignItems: 'flex-start',
+                                    }}
+                                >
+                                    {/* Avatar */}
+                                    {msg.role === 'ai' ? (
+                                        <div style={{
+                                            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                                            background: 'linear-gradient(135deg, #7c3aed, #00e5ff)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            boxShadow: '0 0 14px rgba(124,58,237,0.35)',
+                                        }}>
+                                            <FiZap size={15} color="white" />
+                                        </div>
+                                    ) : (
+                                        <div style={{
+                                            width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                                            background: 'linear-gradient(135deg, #4f46e5, #7c3aed)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            fontWeight: 700, fontSize: 13, color: 'white',
+                                        }}>
+                                            {userInitials}
+                                        </div>
+                                    )}
 
-                                {/* Bubble */}
-                                <div style={{
-                                    maxWidth: '72%', padding: '13px 17px',
-                                    borderRadius: msg.role === 'ai' ? '4px 18px 18px 18px' : '18px 4px 18px 18px',
-                                    background: msg.role === 'ai'
-                                        ? 'rgba(124,58,237,0.08)'
-                                        : 'linear-gradient(135deg, rgba(124,58,237,0.5), rgba(0,229,255,0.25))',
-                                    border: `1px solid ${msg.role === 'ai' ? 'rgba(124,58,237,0.18)' : 'transparent'}`,
-                                    fontSize: 14, lineHeight: 1.75,
-                                    color: 'var(--text-1)', whiteSpace: 'pre-wrap',
-                                    backdropFilter: msg.role === 'ai' ? 'blur(4px)' : 'none',
-                                }}>
-                                    {msg.text}
-                                </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+                                    {/* Bubble */}
+                                    <div style={{
+                                        maxWidth: '72%', padding: '13px 17px',
+                                        borderRadius: msg.role === 'ai' ? '4px 18px 18px 18px' : '18px 4px 18px 18px',
+                                        background: msg.role === 'ai'
+                                            ? 'rgba(124,58,237,0.08)'
+                                            : 'linear-gradient(135deg, rgba(124,58,237,0.5), rgba(0,229,255,0.25))',
+                                        border: `1px solid ${msg.role === 'ai' ? 'rgba(124,58,237,0.18)' : 'transparent'}`,
+                                        fontSize: 14, lineHeight: 1.75,
+                                        color: 'var(--text-1)', whiteSpace: 'pre-wrap',
+                                        backdropFilter: msg.role === 'ai' ? 'blur(4px)' : 'none',
+                                    }}>
+                                        {msg.text}
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
 
-                    {loading && <TypingDots />}
-                    <div ref={bottomRef} />
+                        {loading && <TypingDots />}
+                        <div ref={bottomRef} />
+                    </div>
                 </div>
 
                 {/* Suggested prompts — only on fresh/empty session */}
