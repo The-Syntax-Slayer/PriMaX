@@ -60,7 +60,18 @@ function MentalOverview({ userId }) {
             ]);
             const moods = mRes.data || [];
             const avgMood = moods.length ? (moods.reduce((s, m) => s + m.mood_value, 0) / moods.length).toFixed(1) : null;
-            setData({ journals: jRes.data || [], recentMoods: moods, avgMood, gratitudeCount: (gRes.data || []).length });
+
+            // Generate a random affirmation if not exists
+            const affirmations = [
+                "I am capable of achieving anything I set my mind to.",
+                "Every challenge is an opportunity for growth.",
+                "I radiate confidence, self-respect, and inner harmony.",
+                "My mind is full of brilliant ideas and potential.",
+                "I am becoming the best version of myself every single day."
+            ];
+            const dailyAff = affirmations[new Date().getDate() % affirmations.length];
+
+            setData({ journals: jRes.data || [], recentMoods: moods, avgMood, gratitudeCount: (gRes.data || []).length, dailyAff });
             setLoading(false);
         })();
     }, [userId]);
@@ -81,21 +92,43 @@ function MentalOverview({ userId }) {
                     { label: 'Avg Mood (7 days)', value: data.avgMood ? `${moodObj?.icon} ${data.avgMood}` : '–', color: moodObj?.color || '#5a5a80' },
                     { label: 'Gratitude Days', value: data.gratitudeCount, color: '#f59e0b' },
                 ].map((s, i) => (
-                    <div key={i} style={{ padding: '16px 18px', borderRadius: 14, background: `${s.color}0c`, border: `1px solid ${s.color}20` }}>
+                    <div key={i} style={{ padding: '16px 18px', borderRadius: 14, background: `${s.color}0c`, border: `1px solid ${s.color}20`, backdropFilter: 'blur(10px)' }}>
                         <div style={{ fontFamily: 'Orbitron, monospace', fontSize: 22, fontWeight: 900, color: s.color }}>{s.value || 0}</div>
                         <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>{s.label}</div>
                     </div>
                 ))}
             </div>
+
+            {/* Daily Affirmation */}
+            <Card style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(0,229,255,0.08))', border: '1px solid rgba(124,58,237,0.2)', textAlign: 'center' }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: '#00e5ff', textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 12 }}>✨ DAILY AFFIRMATION</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-1)', fontStyle: 'italic', lineHeight: 1.6 }}>
+                    "{data.dailyAff}"
+                </div>
+            </Card>
             {data.recentMoods.length > 0 && (
                 <Card style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>📈 Mood Trend (Last 7 days)</div>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 60 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>📈 Futuristic Mood Trend</div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-end', height: 100, padding: '10px 0' }}>
                         {[...data.recentMoods].reverse().map((m, i) => {
                             const mo = MOODS.find(x => x.value === m.mood_value);
-                            return <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                                <div style={{ width: '100%', background: `${mo?.color || '#5a5a80'}30`, borderRadius: 4, height: `${m.mood_value / 5 * 100}%`, minHeight: 8, border: `1px solid ${mo?.color || '#5a5a80'}50`, transition: 'height 0.5s' }} />
-                                <span style={{ fontSize: 14 }}>{mo?.icon}</span>
+                            return <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                                <motion.div
+                                    initial={{ height: 0 }}
+                                    animate={{ height: `${m.mood_value / 5 * 100}%` }}
+                                    transition={{ duration: 1, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                                    style={{
+                                        width: '100%',
+                                        background: `linear-gradient(to top, ${mo?.color}44, ${mo?.color})`,
+                                        borderRadius: '8px 8px 4px 4px',
+                                        minHeight: 12,
+                                        boxShadow: `0 0 15px ${mo?.color}33`,
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <div style={{ position: 'absolute', top: -20, left: '50%', transform: 'translateX(-50%)', fontSize: 12 }}>{mo?.icon}</div>
+                                </motion.div>
+                                <span style={{ fontSize: 9, color: 'var(--text-3)', fontWeight: 600 }}>{new Date(m.logged_at).toLocaleDateString(undefined, { weekday: 'short' })}</span>
                             </div>;
                         })}
                     </div>

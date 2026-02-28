@@ -70,6 +70,8 @@ function KanbanBoard({ userId }) {
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
     const [form, setForm] = useState({ title: '', priority: 'medium', due_date: '' });
+    const [editingId, setEditingId] = useState(null);
+    const [editValue, setEditValue] = useState('');
 
     useEffect(() => {
         supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false })
@@ -89,6 +91,19 @@ function KanbanBoard({ userId }) {
     const deleteTask = async (id) => {
         await supabase.from('tasks').delete().eq('id', id);
         setTasks(ts => ts.filter(t => t.id !== id));
+    };
+    const updateTaskTitle = async (id) => {
+        if (!editValue.trim()) { setEditingId(null); return; }
+        await supabase.from('tasks').update({ title: editValue.trim() }).eq('id', id);
+        setTasks(ts => ts.map(t => t.id === id ? { ...t, title: editValue.trim() } : t));
+        setEditingId(null);
+    };
+    const clearCompleted = async () => {
+        const doneTasks = tasks.filter(t => t.status === 'done');
+        if (!doneTasks.length) return;
+        if (!window.confirm(`Clear all ${doneTasks.length} completed tasks?`)) return;
+        await supabase.from('tasks').delete().eq('status', 'done').eq('user_id', userId);
+        setTasks(ts => ts.filter(t => t.status !== 'done'));
     };
 
     if (loading) return (
@@ -161,6 +176,11 @@ function KanbanBoard({ userId }) {
                                     <div style={{ width: 9, height: 9, borderRadius: '50%', background: col.color, boxShadow: `0 0 8px ${col.color}88` }} />
                                     <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-1)' }}>{col.label}</span>
                                     <span style={{ marginLeft: 'auto', fontSize: 11, color: col.color, background: `${col.color}18`, padding: '2px 8px', borderRadius: 100, fontWeight: 700 }}>{colTasks.length}</span>
+                                    {col.id === 'done' && colTasks.length > 0 && (
+                                        <button onClick={clearCompleted} title="Clear completed" style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                            <FiTrash2 size={12} />
+                                        </button>
+                                    )}
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minHeight: 80 }}>
                                     {colTasks.length === 0 && (
@@ -175,8 +195,19 @@ function KanbanBoard({ userId }) {
                                                     whileHover={{ y: -2, boxShadow: `0 8px 30px rgba(0,0,0,0.2)` }}
                                                     style={{ padding: '14px', borderRadius: 14, background: 'var(--app-surface)', border: '1px solid var(--app-border)', borderLeft: `3px solid ${PRIORITIES[t.priority] || '#5a5a80'}`, transition: 'all 0.2s' }}
                                                 >
-                                                    <div style={{ fontSize: 13, fontWeight: 600, color: t.status === 'done' ? 'var(--text-3)' : 'var(--text-1)', textDecoration: t.status === 'done' ? 'line-through' : 'none', marginBottom: 10, lineHeight: 1.5 }}>
-                                                        {t.title}
+                                                    <div style={{ fontSize: 13, fontWeight: 600, color: t.status === 'done' ? 'var(--text-3)' : 'var(--text-1)', textDecoration: t.status === 'done' ? 'line-through' : 'none', marginBottom: 10, lineHeight: 1.5, cursor: 'text' }}>
+                                                        {editingId === t.id ? (
+                                                            <input
+                                                                autoFocus
+                                                                value={editValue}
+                                                                onChange={e => setEditValue(e.target.value)}
+                                                                onBlur={() => updateTaskTitle(t.id)}
+                                                                onKeyDown={e => e.key === 'Enter' && updateTaskTitle(t.id)}
+                                                                style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: 'none', borderBottom: '1px solid #7c3aed', color: 'var(--text-1)', outline: 'none', fontSize: 13, padding: '2px 0' }}
+                                                            />
+                                                        ) : (
+                                                            <span onClick={() => { setEditingId(t.id); setEditValue(t.title); }}>{t.title}</span>
+                                                        )}
                                                     </div>
                                                     <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
                                                         <span style={{ fontSize: 9, padding: '2px 8px', borderRadius: 100, background: `${PRIORITIES[t.priority]}15`, color: PRIORITIES[t.priority], fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{PRIORITY_LABELS[t.priority]}</span>

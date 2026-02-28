@@ -105,21 +105,36 @@ function ProfileTab({ user }) {
         const file = e.target.files[0];
         if (!file) return;
         setUploading(true);
+        setStatus(null);
+
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}-${Math.random()}.${fileExt}`;
         const filePath = `avatars/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
-        if (uploadError) {
-            setStatus({ type: 'error', msg: 'Upload failed: ' + uploadError.message });
-            setUploading(false);
-            return;
-        }
+        try {
+            const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
 
-        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-        setForm(f => ({ ...f, avatar_url: publicUrl }));
-        setUploading(false);
-        setStatus({ type: 'success', msg: 'Avatar uploaded! Click Save to confirm.' });
+            if (uploadError) {
+                if (uploadError.message.includes('not found')) {
+                    setStatus({
+                        type: 'error',
+                        msg: 'Storage Bucket "avatars" not found. Please create a public bucket named "avatars" in your Supabase Dashboard.'
+                    });
+                } else {
+                    setStatus({ type: 'error', msg: 'Upload failed: ' + uploadError.message });
+                }
+                setUploading(false);
+                return;
+            }
+
+            const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+            setForm(f => ({ ...f, avatar_url: publicUrl }));
+            setStatus({ type: 'success', msg: 'Avatar uploaded! Click "Save Profile" below to confirm.' });
+        } catch (err) {
+            setStatus({ type: 'error', msg: 'An unexpected error occurred during upload.' });
+        } finally {
+            setUploading(false);
+        }
     };
 
     const save = async () => {

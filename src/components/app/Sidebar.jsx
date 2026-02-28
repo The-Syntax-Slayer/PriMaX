@@ -104,21 +104,77 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                     <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 12, fontWeight: 900, color: 'white', letterSpacing: '-0.04em', position: 'relative', zIndex: 1 }}>PX</span>
                 </div>
                 <AnimatePresence>
-                    {!collapsed && (
-                        <motion.span
-                            className="sidebar-brand"
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.22 }}
-                        >
-                            <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 14, fontWeight: 800, letterSpacing: '0.04em', lineHeight: 1 }}>
-                                <span style={{ background: 'linear-gradient(135deg, #c4b5fd, #f0f0ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PriMaX</span>
-                                <span style={{ color: '#00e5ff' }}> Hub</span>
-                            </span>
-                        </motion.span>
-                    )}
+                    <motion.span
+                        className="sidebar-brand"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.22 }}
+                    >
+                        <span style={{ fontFamily: 'Orbitron, monospace', fontSize: 14, fontWeight: 800, letterSpacing: '0.04em', lineHeight: 1 }}>
+                            <span style={{ background: 'linear-gradient(135deg, #c4b5fd, #f0f0ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>PriMaX</span>
+                            <span style={{ color: '#00e5ff' }}> Hub</span>
+                        </span>
+                    </motion.span>
                 </AnimatePresence>
+
+                {/* Notifications at Top */}
+                <div style={{ marginLeft: 'auto', position: 'relative', display: 'flex', alignItems: 'center' }} ref={notifRef}>
+                    <motion.button
+                        whileHover={{ scale: 1.1, background: 'rgba(124,58,237,0.1)' }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setShowNotifs(!showNotifs)}
+                        style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid var(--app-border)',
+                            color: showNotifs ? '#7c3aed' : 'var(--text-3)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: 'pointer', position: 'relative',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <FiBell size={14} />
+                        {unreadCount > 0 && (
+                            <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#7c3aed', borderRadius: '50%', border: '1.5px solid var(--sidebar-bg)', boxShadow: '0 0 10px rgba(124,58,237,0.4)' }} />
+                        )}
+                    </motion.button>
+
+                    <AnimatePresence>
+                        {showNotifs && (
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: -10, x: -10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: -10, x: -10 }}
+                                style={{
+                                    position: 'absolute', top: 'calc(100% + 12px)', right: 0,
+                                    width: 280, background: 'var(--app-surface-solid)',
+                                    border: '1px solid var(--app-border)', borderRadius: 16,
+                                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)', zIndex: 1000,
+                                    padding: '16px', backdropFilter: 'blur(20px)'
+                                }}
+                            >
+                                <div style={{ fontSize: 11, fontWeight: 800, color: 'var(--text-2)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', letterSpacing: '0.08em' }}>
+                                    NOTIFICATIONS
+                                    {unreadCount > 0 && <span style={{ fontSize: 10, color: '#7c3aed', background: 'rgba(124,58,237,0.1)', padding: '2px 8px', borderRadius: 100 }}>{unreadCount} NEW</span>}
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+                                    {notifs.length === 0 ? (
+                                        <div style={{ padding: '30px 20px', textAlign: 'center', color: 'var(--text-3)', fontSize: 12 }}>
+                                            <div style={{ fontSize: 24, marginBottom: 8 }}>🔔</div>
+                                            No new notifications
+                                        </div>
+                                    ) : notifs.map(n => (
+                                        <div key={n.id} style={{ padding: '10px 12px', borderRadius: 10, background: n.is_read ? 'transparent' : 'rgba(124,58,237,0.04)', border: '1px solid var(--app-border)' }}>
+                                            <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)' }}>{n.title}</div>
+                                            <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4, lineHeight: 1.5 }}>{n.message}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </div>
 
             {/* Nav */}
@@ -199,54 +255,21 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {/* User Profile & Notifications */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px' }}>
-                        <div style={{ position: 'relative' }} ref={notifRef}>
-                            <motion.button
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
-                                onClick={() => setShowNotifs(!showNotifs)}
-                                style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--app-border)', color: 'var(--text-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative' }}
-                            >
-                                <FiBell size={16} />
-                                {unreadCount > 0 && (
-                                    <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: '#7c3aed', borderRadius: '50%', border: '1px solid var(--app-bg-2)' }} />
-                                )}
-                            </motion.button>
 
-                            <AnimatePresence>
-                                {showNotifs && (
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.95, y: -20, x: 10 }}
-                                        animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
-                                        exit={{ opacity: 0, scale: 0.95, y: -20, x: 10 }}
-                                        style={{ position: 'absolute', bottom: 'calc(100% + 12px)', left: 0, width: 260, background: 'var(--app-surface-solid)', border: '1px solid var(--app-border)', borderRadius: 16, boxShadow: '0 20px 50px rgba(0,0,0,0.5)', z_index: 200, padding: '12px' }}
-                                    >
-                                        <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--text-2)', marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                            NOTIFICATIONS
-                                            {unreadCount > 0 && <span style={{ fontSize: 10, color: '#7c3aed' }}>{unreadCount} new</span>}
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                            {notifs.length === 0 ? (
-                                                <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-3)', fontSize: 12 }}>No new notifications</div>
-                                            ) : notifs.map(n => (
-                                                <div key={n.id} style={{ padding: '8px 10px', borderRadius: 8, background: n.is_read ? 'transparent' : 'rgba(124,58,237,0.06)', border: '1px solid transparent' }}>
-                                                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-1)' }}>{n.title}</div>
-                                                    <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{n.message}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '4px 8px', borderRadius: 10, cursor: 'pointer', background: 'rgba(255,255,255,0.03)' }} onClick={() => navigate('/app/settings')}>
-                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900, color: 'white' }}>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, padding: '6px 10px', borderRadius: 12, cursor: 'pointer', background: 'rgba(255,255,255,0.03)', border: '1px solid transparent', transition: 'all 0.2s' }}
+                            onClick={() => navigate('/app/settings')}
+                            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(124,58,237,0.3)'}
+                            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'transparent'}
+                        >
+                            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#7c3aed,#00e5ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: 'white', border: '2px solid rgba(255,255,255,0.1)' }}>
                                 {initials}
                             </div>
                             {!collapsed && (
-                                <div style={{ overflow: 'hidden' }}>
+                                <div style={{ flex: 1, overflow: 'hidden' }}>
                                     <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-1)', whiteSpace: 'nowrap' }}>{userName}</div>
-                                    <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>Premium Plan</div>
+                                    <div style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                        <FiSettings size={10} /> Account Settings
+                                    </div>
                                 </div>
                             )}
                         </div>

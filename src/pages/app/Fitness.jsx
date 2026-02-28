@@ -209,7 +209,7 @@ function WorkoutLog({ userId }) {
     const [workouts, setWorkouts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [adding, setAdding] = useState(false);
-    const [form, setForm] = useState({ name: '', type: 'Strength', duration_minutes: '', notes: '', completed_at: new Date().toISOString().split('T')[0] });
+    const [form, setForm] = useState({ name: '', type: 'Strength', duration_minutes: '', notes: '', exercises: '', completed_at: new Date().toISOString().split('T')[0] });
 
     useEffect(() => {
         supabase.from('workouts').select('*').eq('user_id', userId).order('completed_at', { ascending: false }).limit(30)
@@ -220,7 +220,7 @@ function WorkoutLog({ userId }) {
         if (!form.name.trim()) return;
         const { data, error } = await supabase.from('workouts').insert({ user_id: userId, ...form, duration_minutes: parseInt(form.duration_minutes) || null }).select().single();
         if (!error && data) setWorkouts(w => [data, ...w]);
-        setForm({ name: '', type: 'Strength', duration_minutes: '', notes: '', completed_at: new Date().toISOString().split('T')[0] }); setAdding(false);
+        setForm({ name: '', type: 'Strength', duration_minutes: '', notes: '', exercises: '', completed_at: new Date().toISOString().split('T')[0] }); setAdding(false);
     };
     const del = async (id) => { await supabase.from('workouts').delete().eq('id', id); setWorkouts(ws => ws.filter(w => w.id !== id)); };
 
@@ -243,6 +243,9 @@ function WorkoutLog({ userId }) {
                                         {WORKOUT_TYPES.map(t => <option key={t}>{t}</option>)}
                                     </select>
                                     <input value={form.duration_minutes} onChange={e => setForm(f => ({ ...f, duration_minutes: e.target.value }))} placeholder="Duration (mins)" type="number" className="app-input" />
+                                </div>
+                                <div style={{ marginBottom: 10 }}>
+                                    <textarea value={form.exercises} onChange={e => setForm(f => ({ ...f, exercises: e.target.value }))} placeholder="Exercises (e.g. Bench Press 3x10, Squats 4x12...)" className="app-input" style={{ minHeight: 60, resize: 'vertical' }} />
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                                     <input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Notes (optional)" className="app-input" />
@@ -285,6 +288,11 @@ function WorkoutLog({ userId }) {
                                         <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{w.completed_at}</span>
                                     </div>
                                     {w.notes && <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5, fontStyle: 'italic' }}>{w.notes}</div>}
+                                    {w.exercises && (
+                                        <div style={{ marginTop: 8, padding: '8px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 11, color: 'var(--text-2)', whiteSpace: 'pre-wrap' }}>
+                                            <strong>Exercises:</strong><br />{w.exercises}
+                                        </div>
+                                    )}
                                 </div>
                                 <button onClick={() => del(w.id)} className="btn-danger"><FiTrash2 size={13} /></button>
                             </motion.div>
@@ -309,9 +317,10 @@ function AIFitnessCoach({ userId }) {
     const generate = async () => {
         if (!q.trim()) return;
         setLoading(true); setRes('');
-        const { data: recent } = await supabase.from('workouts').select('name,type,duration_minutes').eq('user_id', userId).order('completed_at', { ascending: false }).limit(5);
-        const ctx = recent?.length ? `Recent workouts: ${recent.map(w => `${w.name} (${w.type}, ${w.duration_minutes}min)`).join(', ')}.` : 'No workout history yet.';
-        const { text, error } = await callGemini(`${ctx}\n\nFitness question: "${q}"`, SYSTEM_PROMPTS.fitness);
+        const { data: recent } = await supabase.from('workouts').select('name,type,duration_minutes,exercises').eq('user_id', userId).order('completed_at', { ascending: false }).limit(5);
+        const ctx = recent?.length ? `Recent workouts: ${recent.map(w => `${w.name} (${w.type}, ${w.duration_minutes}min)${w.exercises ? ` - Exercises: ${w.exercises}` : ''}`).join(' | ')}.` : 'No workout history yet.';
+        const customPrompt = `${SYSTEM_PROMPTS.fitness}\n\nWhen providing advice, include specific "Easy vs Hard" effort comparisons for exercises and suggest alternatives where appropriate. Always aim for a professional, futuristic, and motivating tone.`;
+        const { text, error } = await callGemini(`${ctx}\n\nFitness question: "${q}"`, customPrompt);
         if (!error && text) {
             setRes(text);
             await supabase.from('ai_history').insert({
