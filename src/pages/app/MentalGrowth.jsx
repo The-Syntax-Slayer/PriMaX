@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSun, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiX, FiEdit3 } from 'react-icons/fi';
+import { FiSun, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiX, FiEdit3, FiSave } from 'react-icons/fi';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, SYSTEM_PROMPTS } from '../../lib/aiService';
