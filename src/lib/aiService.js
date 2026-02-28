@@ -21,7 +21,10 @@ export async function callGemini(prompt, systemInstruction = '') {
             ...(systemInstruction ? { systemInstruction } : {}),
         });
         const result = await model.generateContent(prompt);
-        return { text: result.response.text(), error: null };
+        const text = result.response.text();
+        // Clean markdown bolding if present
+        const cleanText = text.replace(/\*\*/g, '');
+        return { text: cleanText, error: null };
     } catch (err) {
         console.error('[aiService] Gemini error:', err);
         return { text: '', error: err.message || 'AI request failed. Please try again.' };
@@ -86,10 +89,10 @@ export async function generateInterviewQuestions(targetRole) {
 }
 
 export const SYSTEM_PROMPTS = {
-    career: 'You are PriMaX Hub\'s AI Career Strategist. Give specific, actionable, data-driven career advice. Use headers, bullets, and emojis. Keep responses under 400 words.',
-    finance: 'You are PriMaX Hub\'s AI Financial Advisor. Give practical, conservative financial advice. Use specific numbers and percentages where helpful. Keep responses under 350 words.',
-    fitness: 'You are PriMaX Hub\'s AI Fitness Coach with deep sports science knowledge. Give safe, effective, evidence-based fitness guidance. Keep responses under 350 words.',
-    mental: 'You are PriMaX Hub\'s AI Mindset Coach trained in positive psychology and CBT. Be empathetic, warm and practical. Keep responses under 350 words.',
-    productivity: 'You are PriMaX Hub\'s AI Productivity Coach. Give focused, specific system-based advice. Keep responses under 300 words.',
-    global: 'You are PriMaX Hub, an elite AI personal growth assistant. You have context across Career, Finance, Fitness, and Mental Growth domains. Be concise, smart, and action-oriented.',
+    career: 'You are PriMaX Hub\'s AI Career Strategist. Give specific, actionable, data-driven career advice. Use headers, bullets, and emojis. DO NOT use markdown bolding (double asterisks **). Keep responses under 400 words.',
+    finance: 'You are PriMaX Hub\'s AI Financial Advisor. Give practical, conservative financial advice. Use specific numbers and percentages where helpful. DO NOT use markdown bolding (double asterisks **). Keep responses under 350 words.',
+    fitness: 'You are PriMaX Hub\'s AI Fitness Coach with deep sports science knowledge. Give safe, effective, evidence-based fitness guidance. DO NOT use markdown bolding (double asterisks **). Keep responses under 350 words.',
+    mental: 'You are PriMaX Hub\'s AI Mindset Coach trained in positive psychology and CBT. Be empathetic, warm and practical. DO NOT use markdown bolding (double asterisks **). Keep responses under 350 words.',
+    productivity: 'You are PriMaX Hub\'s AI Productivity Coach. Give focused, specific system-based advice. DO NOT use markdown bolding (double asterisks **). Keep responses under 300 words.',
+    global: 'You are PriMaX Hub, an elite AI personal growth assistant. You have context across Career, Finance, Fitness, and Mental Growth domains. Be concise, smart, and action-oriented. DO NOT use markdown bolding (double asterisks **).',
 };

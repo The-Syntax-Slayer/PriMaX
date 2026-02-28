@@ -114,24 +114,31 @@ function ProfileTab({ user }) {
         try {
             const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
 
-            if (uploadError) {
-                if (uploadError.message.includes('not found')) {
-                    setStatus({
-                        type: 'error',
-                        msg: 'Storage Bucket "avatars" not found. Please create a public bucket named "avatars" in your Supabase Dashboard.'
-                    });
-                } else {
-                    setStatus({ type: 'error', msg: 'Upload failed: ' + uploadError.message });
-                }
-                setUploading(false);
-                return;
-            }
+            if (uploadError) throw uploadError;
 
             const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
             setForm(f => ({ ...f, avatar_url: publicUrl }));
             setStatus({ type: 'success', msg: 'Avatar uploaded! Click "Save Profile" below to confirm.' });
         } catch (err) {
-            setStatus({ type: 'error', msg: 'An unexpected error occurred during upload.' });
+            if (err.message?.includes('not found') || err.status === 404 || err.status === '404') {
+                setStatus({
+                    type: 'error',
+                    msg: (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                            <div>⚠️ <b>Storage Bucket "avatars" not found.</b></div>
+                            <div style={{ fontSize: 12 }}>Please create a <b>Public</b> bucket named <code style={{ background: 'rgba(255,255,255,0.1)', padding: '2px 4px', borderRadius: 4 }}>avatars</code> in your Supabase Dashboard.</div>
+                            <button
+                                onClick={() => navigator.clipboard.writeText('avatars')}
+                                style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--app-border)', color: 'var(--text-2)', padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer' }}
+                            >
+                                Copy Bucket Name
+                            </button>
+                        </div>
+                    )
+                });
+            } else {
+                setStatus({ type: 'error', msg: 'Upload failed: ' + err.message });
+            }
         } finally {
             setUploading(false);
         }
@@ -147,19 +154,28 @@ function ProfileTab({ user }) {
                     type: 'error',
                     msg: (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                            <div>⚠️ <b>Database Schema Out of Sync!</b> Please run this SQL in your Supabase SQL Editor:</div>
-                            <pre style={{ background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: 6, fontSize: 11, overflowX: 'auto', border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <div style={{ color: '#f87171', fontWeight: 800 }}>⚠️ DATABASE SCHEMA OUT OF SYNC</div>
+                            <div style={{ fontSize: 12, lineHeight: 1.5 }}>The profile columns (bio, primary_goal, focus_areas) are missing from your Supabase table. Please run this SQL in your <b>Supabase SQL Editor</b>:</div>
+                            <pre style={{ background: 'rgba(0,0,0,0.5)', padding: '12px', borderRadius: 8, fontSize: 11, overflowX: 'auto', border: '1px solid rgba(248,113,113,0.3)', color: '#eee', fontFamily: 'JetBrains Mono, monospace' }}>
                                 {`ALTER TABLE profiles 
 ADD COLUMN IF NOT EXISTS bio text,
 ADD COLUMN IF NOT EXISTS primary_goal text,
 ADD COLUMN IF NOT EXISTS focus_areas text[];`}
                             </pre>
-                            <button
-                                onClick={() => navigator.clipboard.writeText(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio text, ADD COLUMN IF NOT EXISTS primary_goal text, ADD COLUMN IF NOT EXISTS focus_areas text[];`)}
-                                style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--app-border)', color: 'var(--text-2)', padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer' }}
-                            >
-                                Copy SQL Command
-                            </button>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(`ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio text, ADD COLUMN IF NOT EXISTS primary_goal text, ADD COLUMN IF NOT EXISTS focus_areas text[];`)}
+                                    style={{ background: 'var(--accent)', color: 'white', border: 'none', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(var(--accent-rgb), 0.3)' }}
+                                >
+                                    Copy SQL Command
+                                </button>
+                                <button
+                                    onClick={() => window.open('https://supabase.com/dashboard/project/_/sql/new', '_blank')}
+                                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid var(--app-border)', color: 'var(--text-2)', padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                                >
+                                    Open Supabase SQL Editor
+                                </button>
+                            </div>
                         </div>
                     )
                 });
