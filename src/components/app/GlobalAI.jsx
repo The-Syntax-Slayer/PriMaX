@@ -67,10 +67,14 @@ export default function GlobalAI() {
 
         try {
             const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-            const prompt = `You are the PriMaX Hub Global AI, an elite personal assistant. Context: The user is using a productivity, finance, career, and fitness app. Answer concisely, smartly, and use formatting. User: ${userTxt}`;
+            const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+            const prompt = `You are the PriMaX Hub Global AI, an elite personal assistant. Context: The user is using a productivity, finance, career, and fitness app. Answer concisely, smartly, and use formatting. IMPORTANT: DO NOT USE BOLD MARKDOWN (**). User: ${userTxt}`;
             const result = await model.generateContent(prompt);
-            const aiTxt = result.response.text();
+            let aiTxt = result.response.text();
+
+            // Clean markdown bolding
+            aiTxt = aiTxt.replace(/\*\*/g, '');
+
             setMsgs((p) => [...p, { role: 'ai', text: aiTxt }]);
 
             // Persist to DB
