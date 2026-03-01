@@ -5,6 +5,8 @@ import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, SYSTEM_PROMPTS } from '../../lib/aiService';
 import { HabitTracker } from './Productivity';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
+import { useCallback } from 'react';
 
 const Spinner = () => (
     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }} style={{ display: 'inline-flex', color: '#7c3aed' }}>
@@ -97,7 +99,7 @@ function FitnessOverview({ userId }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const fetchOverview = useCallback(() => {
         (async () => {
             const thisMonth = new Date(); thisMonth.setDate(1);
             const [wRes, hRes] = await Promise.all([
@@ -119,6 +121,10 @@ function FitnessOverview({ userId }) {
             setLoading(false);
         })();
     }, [userId]);
+
+    useEffect(() => { fetchOverview(); }, [fetchOverview]);
+    useRealtimeRefresh('workouts', userId, fetchOverview);
+    useRealtimeRefresh('habits', userId, fetchOverview);
 
     if (loading) return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
@@ -211,10 +217,13 @@ function WorkoutLog({ userId }) {
     const [adding, setAdding] = useState(false);
     const [form, setForm] = useState({ name: '', type: 'Strength', duration_minutes: '', notes: '', exercises: '', completed_at: new Date().toISOString().split('T')[0] });
 
-    useEffect(() => {
+    const fetchWorkouts = useCallback(() => {
         supabase.from('workouts').select('*').eq('user_id', userId).order('completed_at', { ascending: false }).limit(30)
             .then(({ data }) => { setWorkouts(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchWorkouts(); }, [fetchWorkouts]);
+    useRealtimeRefresh('workouts', userId, fetchWorkouts);
 
     const addWorkout = async () => {
         if (!form.name.trim()) return;

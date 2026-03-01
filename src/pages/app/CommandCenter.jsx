@@ -6,6 +6,7 @@ import {
     FiActivity, FiSun, FiMoon, FiCalendar, FiChevronRight,
     FiDollarSign, FiHeart, FiBriefcase, FiBarChart2,
     FiMessageCircle, FiAlertCircle, FiAward, FiPlus,
+    FiShield, FiLayers, FiCompass, FiCpu, FiBookOpen, FiFileText, FiUsers
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -31,7 +32,6 @@ const aiInsights = [
     { emoji: '🧠', title: "Reflect on today's wins", body: "Studies show that journaling your wins increases satisfaction by 27% and primes your brain for better performance tomorrow.", color: '#00e5ff', action: 'Open Journal', actionTo: '/app/mental' },
     { emoji: '🚀', title: 'Polish your career roadmap', body: "Professionals who update their skill profile monthly get 3x more opportunities. Check your Career hub and add any new skills earned this week.", color: '#10b981', action: 'View Career', actionTo: '/app/career' },
     { emoji: '⏱', title: 'Schedule a deep work block', body: "Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now - even one session can move the needle on your most important project.", color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
-    { emoji: '⏱️', title: 'Schedule a deep work block', body: 'Distractions cut deep work sessions by 40%. Try a focused 25-minute Pomodoro sprint now — even one session can move the needle on your most important project.', color: '#f97316', action: 'Start Focus', actionTo: '/app/productivity' },
 ];
 
 const fadeUp = (delay = 0) => ({

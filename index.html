@@ -1,16 +1,36 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PriMaX Hub — AI Personal Growth Platform</title>
-    <meta name="description" content="PriMaX Hub is the world's most advanced AI personal growth platform. Achieve your goals 10x faster with AI coaching, habit engineering, and precision analytics." />
-    <meta property="og:title" content="PriMaX Hub — AI Personal Growth Platform" />
-    <meta property="og:description" content="Unlock your maximum potential with AI-powered growth tools. Join 50,000+ growth pioneers." />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PriMaX Hub - AI Personal Growth Platform</title>
+  <script>
+    window.addEventListener('error', function (e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'color:red;font-size:16px;z-index:99999;position:fixed;top:0;left:0;background:white;padding:20px;border:2px solid red;max-width:100vw;word-wrap:break-word;';
+      errorDiv.innerHTML = '<strong>Uncaught Error!</strong><br/>' + e.message + '<br/>' + e.filename + ':' + e.lineno;
+      document.body.appendChild(errorDiv);
+    });
+    window.addEventListener('unhandledrejection', function (e) {
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'color:purple;font-size:16px;z-index:99999;position:fixed;top:100px;left:0;background:white;padding:20px;border:2px solid purple;max-width:100vw;word-wrap:break-word;';
+      errorDiv.innerHTML = '<strong>Unhandled Promise!</strong><br/>' + e.reason;
+      document.body.appendChild(errorDiv);
+    });
+  </script>
+  <!-- Import Google Fonts for orbitron and inter -->
+  <meta name="description"
+    content="PriMaX Hub is the world's most advanced AI personal growth platform. Achieve your goals 10x faster with AI coaching, habit engineering, and precision analytics." />
+  <meta property="og:title" content="PriMaX Hub — AI Personal Growth Platform" />
+  <meta property="og:description"
+    content="Unlock your maximum potential with AI-powered growth tools. Join 50,000+ growth pioneers." />
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

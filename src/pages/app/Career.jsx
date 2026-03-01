@@ -8,6 +8,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, generateCareerRoadmap, generateInterviewQuestions, SYSTEM_PROMPTS } from '../../lib/aiService';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 
 const TABS = [
     { id: 'roadmap', label: 'Career Roadmap', icon: <FiMap size={14} /> },
@@ -61,6 +62,7 @@ export default function Career() {
     }, [user]);
 
     useEffect(() => { fetchProfile(); }, [fetchProfile]);
+    useRealtimeRefresh('career_profiles', user?.id, fetchProfile);
 
     if (loadingProfile) return (
         <div className="page-shell" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 300 }}>
@@ -221,13 +223,16 @@ function CareerRoadmap({ profile }) {
     const [milestones, setMilestones] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
+    const fetchMilestones = useCallback(() => {
         (async () => {
             const { data } = await supabase.from('career_milestones').select('*').eq('user_id', user.id).order('created_at');
             setMilestones(data || []);
             setLoading(false);
         })();
     }, [user]);
+
+    useEffect(() => { fetchMilestones(); }, [fetchMilestones]);
+    useRealtimeRefresh('career_milestones', user.id, fetchMilestones);
 
     const toggleStatus = async (m) => {
         const newStatus = m.status === 'done' ? 'active' : m.status === 'active' ? 'done' : 'active';
@@ -331,13 +336,16 @@ function JobTracker({ userId }) {
     const [saving, setSaving] = useState(false);
     const stages = ['Applied', 'Screening', 'Interview', 'Offer'];
 
-    useEffect(() => {
+    const fetchJobs = useCallback(() => {
         (async () => {
             const { data } = await supabase.from('job_applications').select('*').eq('user_id', userId).order('created_at', { ascending: false });
             setJobs(data || []);
             setLoading(false);
         })();
     }, [userId]);
+
+    useEffect(() => { fetchJobs(); }, [fetchJobs]);
+    useRealtimeRefresh('job_applications', userId, fetchJobs);
 
     const addJob = async () => {
         if (!form.company.trim() || !form.role.trim()) return;
@@ -446,6 +454,7 @@ function ResumeBuilder({ profile }) {
     }, [user.id, activeResumeId]);
 
     useEffect(() => { fetchResumes(); }, [fetchResumes]);
+    useRealtimeRefresh('resumes', user.id, fetchResumes);
 
     const generate = async () => {
         setGenerating(true);

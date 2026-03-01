@@ -851,6 +851,241 @@ Small inputs. Long game. Trust the process.`,
         ]);
 
         // ══════════════════════════════════════════════════
+        // TIER 2 & TIER 3 — BEAST MODE MODULES
+        // ══════════════════════════════════════════════════
+
+        // 1. Goal Planning
+        await supabase.from('goals').insert([
+            {
+                user_id: userId,
+                title: 'Ship V2 Platform to Production',
+                description: 'Complete architecture rewrite and successfully migrate 100% of traffic.',
+                target_date: d(-45),
+                priority: 'high',
+                color: '#ef4444',
+                progress: 65,
+                status: 'active',
+                milestones: [
+                    { text: 'Finalize database migration script', done: true },
+                    { text: 'Complete load testing on staging', done: false },
+                    { text: 'Execute dark launch for 10% of users', done: false }
+                ],
+                ai_analysis: {
+                    probability: 82,
+                    analysis: 'Strong momentum, but staging timeframe is tightly compressed.',
+                    rescue_plan: 'Shift QA resources from mobile app to platform team immediately to de-risk load testing phase.'
+                }
+            },
+            {
+                user_id: userId,
+                title: 'Transition to Staff Engineer role',
+                description: 'Navigate the promotion cycle by demonstrating cross-org leverage.',
+                target_date: d(-180),
+                priority: 'medium',
+                color: '#7c3aed',
+                progress: 40,
+                status: 'active',
+                milestones: [
+                    { text: 'Read DDIA and summarize for team', done: true },
+                    { text: 'Lead architectural review committee', done: true },
+                    { text: 'Mentorship of 2 junior engineers', done: false }
+                ]
+            }
+        ]);
+
+        // 2. Learning
+        await supabase.from('learning_items').insert([
+            {
+                user_id: userId,
+                title: 'Designing Data-Intensive Applications',
+                category: 'Book',
+                target_date: d(-30),
+                frequency: 'Weekly',
+                color: '#3b82f6',
+                progress: 75,
+                status: 'In Progress',
+                notes: 'Focusing on chapter 5 (Replication) this week.'
+            },
+            {
+                user_id: userId,
+                title: 'Advanced React Patterns by Kent C. Dodds',
+                category: 'Course',
+                url: 'epicreact.dev',
+                target_date: d(-15),
+                frequency: 'Daily',
+                color: '#0ea5e9',
+                progress: 100,
+                status: 'Completed'
+            }
+        ]);
+
+        // 3. Life Admin
+        await supabase.from('life_admin').insert([
+            {
+                user_id: userId,
+                title: 'Renew Passport',
+                category: 'Logistics',
+                priority: 'Critical',
+                due_date: d(-5),
+                color: '#ef4444',
+                completed: false,
+                ai_consequence: 'If you fail to renew this week, you will not be able to board your international flight to the Tokyo engineering summit next month. Expedited processing fees will jump by $200.'
+            },
+            {
+                user_id: userId,
+                title: 'File Q1 Quarterly Taxes',
+                category: 'Finance',
+                priority: 'High',
+                due_date: d(-12),
+                color: '#f59e0b',
+                completed: false,
+                ai_consequence: 'Failure to file on time will result in immediate IRS late penalties of 5% per month on the unpaid tax, plus interest compounding daily.'
+            }
+        ]);
+
+        // 4. Social Contacts
+        await supabase.from('social_contacts').insert([
+            {
+                user_id: userId,
+                name: 'Sarah Chen',
+                relationship: 'Mentor',
+                company: 'Google',
+                industry: 'Tech',
+                priority: 'High',
+                color: '#10b981',
+                initials_color: 'linear-gradient(135deg, #10b981, #059669)',
+                follow_up_days: 30,
+                last_contacted: d(14),
+                birthday: '1985-11-22',
+                notes: 'Helped me prep for Staff interviews. Loves artisanal coffee.',
+                interaction_logs: [
+                    { date: d(45), type: 'Coffee', notes: 'Discussed scaling tradeoffs between Mongo and Postgres.' },
+                    { date: d(14), type: 'Message', notes: 'Sent link to the new Stripe engineering blog.' }
+                ]
+            },
+            {
+                user_id: userId,
+                name: 'David Rodriguez',
+                relationship: 'Former Manager',
+                company: 'Stripe',
+                industry: 'FinTech',
+                priority: 'Medium',
+                color: '#3b82f6',
+                initials_color: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                follow_up_days: 90,
+                last_contacted: d(110),
+                notes: 'Good connector for FinTech opportunities.'
+            }
+        ]);
+
+        // 5. Risk Radar
+        await supabase.from('risk_radar').insert([
+            {
+                user_id: userId,
+                title: 'AWS Production Database Size Spiking',
+                category: 'Technical',
+                impact: 'Critical',
+                likelihood: 'Highly Likely',
+                mitigation_plan: 'Implement data archiving strategy for logs older than 30 days. Add read-replicas by Friday.',
+                deadline: d(-2),
+                color: '#ef4444',
+                status: 'Active'
+            },
+            {
+                user_id: userId,
+                title: 'Burnout from Q2 Roadmap',
+                category: 'Health',
+                impact: 'High',
+                likelihood: 'Possible',
+                mitigation_plan: 'Enforce hard stop at 6 PM. Take trailing Friday off at end of month.',
+                deadline: d(-15),
+                color: '#f59e0b',
+                status: 'Active'
+            }
+        ]);
+
+        // 6. Time Allocations (Heatmap Data)
+        const timeAllocations = [];
+        const categories = ['Deep Work', 'Meetings', 'Admin/Email', 'Learning', 'Fitness'];
+        for (let i = 0; i < 45; i++) {
+            timeAllocations.push({
+                user_id: userId,
+                title: `Activity Block ${i}`,
+                duration_hours: Number((Math.random() * 3 + 1).toFixed(1)),
+                category: categories[Math.floor(Math.random() * categories.length)],
+                date: d(Math.floor(Math.random() * 30)),
+                percentage: Math.floor(Math.random() * 5) + 5 // Simulating "Energy Level" 5-10
+            });
+        }
+        await supabase.from('time_allocations').insert(timeAllocations);
+
+        // 7. Strategy Engine (Decisions)
+        await supabase.from('decisions').insert([
+            {
+                user_id: userId,
+                title: 'Adopt GraphQL vs stick with REST for V2',
+                context: 'Platform scaling to 100k DAU. Frontend team wants GQL for flexibility, backend team wants REST for caching simplicity.',
+                color: '#e879f9',
+                status: 'pending',
+                ai_analysis: {
+                    swot: {
+                        strengths: ['GQL solves over-fetching', 'Strong typing system'],
+                        weaknesses: ['Complex caching', 'N+1 query risks'],
+                        opportunities: ['Faster frontend iteration', 'Consolidated API gateway'],
+                        threats: ['Learning curve for backend team', 'Security complexity']
+                    },
+                    options: [
+                        { label: 'GraphQL (Apollo)', pros: 'Exceptional DX, strict schema', cons: 'High infra overhead', score: 8, aiScore: 7, reasoning: 'Offers the best developer velocity if infra team can support it.' },
+                        { label: 'REST (OpenAPI)', pros: 'Proven caching, easy CDN integration', cons: 'Waterfall requests, multiple endpoints', score: 6, aiScore: 8, reasoning: 'Safer bet for current backend skill set.' }
+                    ],
+                    recommendedOption: 'REST (OpenAPI)',
+                    devils_advocate: '- REST will eventually crumble under the weight of UI-specific requirements.\n- Your frontend velocity will grind to a halt waiting for custom endpoints.\n- You are choosing short-term backend comfort over long-term product agility.'
+                }
+            }
+        ]);
+
+        // 8. Life Simulator (Simulations)
+        await supabase.from('simulations').insert([
+            {
+                user_id: userId,
+                title: 'Career: Stay Technical vs Eng Manager',
+                context: 'At a crossroads. I love coding but my highest leverage might be managing people.',
+                timeframe_years: 5,
+                color: '#0ea5e9',
+                ai_prediction: {
+                    scenarios: [
+                        {
+                            name: 'Staff Engineer (Individual Contributor)',
+                            summaryPrediction: 'You retain high technical autonomy and deep focus, becoming a critical architectural node.',
+                            feasibilityScore: 92,
+                            feasibilityNote: 'Aligns strongly with current trajectory.',
+                            riskFactors: ['Isolation', 'Value tied purely to technical output limit'],
+                            upsidePotential: ['Geographical freedom', 'Elegance in craftsmanship'],
+                            metrics: [
+                                { year: 0, wealth: 60, health: 70, happiness: 75 },
+                                { year: 2, wealth: 75, health: 65, happiness: 85 },
+                                { year: 5, wealth: 95, health: 70, happiness: 90 }
+                            ]
+                        },
+                        {
+                            name: 'Engineering Manager',
+                            summaryPrediction: 'A complete contextual shift. You stop writing code and start building the machine that builds the code.',
+                            feasibilityScore: 80,
+                            feasibilityNote: 'Will require significant soft-skill development.',
+                            riskFactors: ['Calendar fragmentation', 'Loss of hard technical skills'],
+                            upsidePotential: ['Organizational leverage', 'Director-level runway'],
+                            metrics: [
+                                { year: 0, wealth: 60, health: 70, happiness: 60 },
+                                { year: 2, wealth: 70, health: 50, happiness: 65 },
+                                { year: 5, wealth: 90, health: 60, happiness: 80 }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]);
+
+        // ══════════════════════════════════════════════════
         // NOTIFICATIONS
         // ══════════════════════════════════════════════════
         await supabase.from('notifications').insert([
@@ -912,6 +1147,8 @@ export const clearMockData = async (userId) => {
             'gratitude_entries', 'affirmations', 'notifications',
             'focus_sessions', 'budgets', 'career_profiles', 'career_milestones',
             'job_applications', 'resumes', 'ai_history',
+            'goals', 'learning_items', 'life_admin', 'social_contacts',
+            'risk_radar', 'time_allocations', 'decisions', 'simulations'
         ];
         await Promise.all(tables.map(table =>
             supabase.from(table).delete().eq('user_id', userId)

@@ -61,10 +61,10 @@ export default function Analytics() {
         if (!user) return;
         (async () => {
             const today = new Date().toISOString().split('T')[0];
-            const [taskRes, habitRes, goalRes, txRes, workoutRes, journalRes, moodRes, gratRes, focusRes, resumeRes] = await Promise.all([
+            const [taskRes, habitRes, goalRes, txRes, workoutRes, journalRes, moodRes, gratRes, focusRes, resumeRes, learnRes, socialRes, decisionRes, simRes] = await Promise.all([
                 supabase.from('tasks').select('status,priority,created_at').eq('user_id', user.id),
                 supabase.from('habits').select('streak,completions,name').eq('user_id', user.id),
-                supabase.from('savings_goals').select('name,target_amount,current_amount').eq('user_id', user.id),
+                supabase.from('goals').select('name,target_amount,current_amount').eq('user_id', user.id),
                 supabase.from('transactions').select('amount,type,category,date').eq('user_id', user.id),
                 supabase.from('workouts').select('type,duration_minutes,completed_at').eq('user_id', user.id),
                 supabase.from('journal_entries').select('id,created_at').eq('user_id', user.id),
@@ -72,6 +72,10 @@ export default function Analytics() {
                 supabase.from('gratitude_entries').select('id').eq('user_id', user.id),
                 supabase.from('focus_sessions').select('duration_minutes').eq('user_id', user.id),
                 supabase.from('resumes').select('id').eq('user_id', user.id),
+                supabase.from('learning_items').select('id').eq('user_id', user.id),
+                supabase.from('social_contacts').select('id').eq('user_id', user.id),
+                supabase.from('decisions').select('id').eq('user_id', user.id),
+                supabase.from('simulations').select('id').eq('user_id', user.id),
             ]);
 
             const tasks = taskRes.data || [];
@@ -84,6 +88,10 @@ export default function Analytics() {
             const gratitude = gratRes.data || [];
             const focus = focusRes.data || [];
             const resumes = resumeRes.data || [];
+            const learningCount = (learnRes.data || []).length;
+            const socialCount = (socialRes.data || []).length;
+            const decisionCount = (decisionRes.data || []).length;
+            const simCount = (simRes.data || []).length;
 
             // Scores (0-100 each)
             const doneRatio = tasks.length ? tasks.filter(t => t.status === 'done').length / tasks.length : 0;
@@ -122,7 +130,8 @@ export default function Analytics() {
                 fitness: { count: workouts.length, totalMins: workouts.reduce((s, w) => s + (w.duration_minutes || 0), 0), workoutTypes },
                 mental: { journals: journals.length, avgMood: avgMood ? avgMood.toFixed(1) : null, moodTrend, gratitude: gratitude.length },
                 focus: { totalMins: focusMins, sessionCount: focus.length },
-                career: { resumes: resumes.length }
+                career: { resumes: resumes.length },
+                learningCount, socialCount, decisionCount, simCount
             });
             setLoading(false);
 
@@ -362,10 +371,14 @@ function AchievementsTab({ stats }) {
         { id: 'journal1', title: 'Reflective', desc: 'Write your first journal entry', icon: '📓', unlocked: stats.mental.journals >= 1 },
         { id: 'journal10', title: 'Mindful Writer', desc: 'Write 10 journal entries', icon: '✍️', unlocked: stats.mental.journals >= 10 },
         { id: 'save', title: 'Saver', desc: 'Have a positive savings rate', icon: '💰', unlocked: stats.finance.savingsRate > 0 },
-        { id: 'goals', title: 'Goal Setter', desc: 'Create your first savings goal', icon: '🎪', unlocked: stats.finance.goalsCount >= 1 },
+        { id: 'goals', title: 'Goal Setter', desc: 'Create your first goal', icon: '🎯', unlocked: stats.finance.goalsCount >= 1 },
+        { id: 'strategist', title: 'Strategist', desc: 'Complete a decision analysis', icon: '♟️', unlocked: stats.decisionCount >= 1 },
+        { id: 'time_traveler', title: 'Time Traveler', desc: 'Run a life simulation', icon: '⏳', unlocked: stats.simCount >= 1 },
+        { id: 'networker', title: 'Networker', desc: 'Add a social contact', icon: '🤝', unlocked: stats.socialCount >= 1 },
+        { id: 'learner', title: 'Lifelong Learner', desc: 'Start learning a new skill', icon: '📚', unlocked: stats.learningCount >= 1 },
         { id: 'score50', title: 'Halfway There', desc: 'Reach overall score of 50', icon: '⭐', unlocked: stats.overallScore >= 50 },
         { id: 'score75', title: 'High Performer', desc: 'Reach overall score of 75', icon: '🌟', unlocked: stats.overallScore >= 75 },
-        { id: 'alldomains', title: 'Renaissance', desc: 'Have data in all 4 domains', icon: '🏆', unlocked: stats.tasks.total > 0 && stats.finance.income + stats.finance.expense > 0 && stats.fitness.count > 0 && stats.mental.journals > 0 },
+        { id: 'alldomains', title: 'Renaissance', desc: 'Have data in all core domains', icon: '🏆', unlocked: stats.tasks.total > 0 && stats.finance.income + stats.finance.expense > 0 && stats.fitness.count > 0 && stats.mental.journals > 0 },
     ];
 
     const unlocked = achievements.filter(a => a.unlocked);
@@ -446,12 +459,13 @@ function AIAnalystTab({ stats, userId }) {
         const ctx = `User's life analytics:
 - Overall Score: ${stats.overallScore}/100
 - Productivity: ${stats.productivityScore}/100 | Focus: ${stats.focus.totalMins} mins | Tasks done: ${stats.tasks.done}/${stats.tasks.total}
-- Career: ${stats.careerScore}/100 | Resumes: ${stats.career.resumes}
-- Finance: ${stats.financeScore}/100 | Net: $${(stats.finance.net || 0).toFixed(0)} | Savings rate: ${stats.finance.savingsRate}%
-- Fitness: ${stats.fitnessScore}/100 | Workouts: ${stats.fitness.count} | Total minutes: ${stats.fitness.totalMins}
-- Mental: ${stats.mentalScore}/100 | Avg mood: ${stats.mental.avgMood || 'N/A'}/5 | Journal entries: ${stats.mental.journals}
+- Career & Network: ${stats.careerScore}/100 | Resumes: ${stats.career.resumes} | Connections: ${stats.socialCount}
+- Finance & Goals: ${stats.financeScore}/100 | Net: $${(stats.finance.net || 0).toFixed(0)} | Active Goals: ${stats.finance.goalsCount}
+- Fitness: ${stats.fitnessScore}/100 | Workouts: ${stats.fitness.count} | Total mins: ${stats.fitness.totalMins}
+- Mental & Learning: ${stats.mentalScore}/100 | Avg mood: ${stats.mental.avgMood || 'N/A'}/5 | Journals: ${stats.mental.journals} | Skills: ${stats.learningCount}
+- Futuristic Intelligence: Decisions Analysed: ${stats.decisionCount} | Life Simulations Run: ${stats.simCount}
 
-${q ? `User question: "${q}"` : 'Give a comprehensive life performance analysis. Identify strengths, weakest areas, and 3 top priority actions to improve the overall score. Be specific and motivating.'}`;
+${q ? `User question: "${q}"` : 'Give a comprehensive life performance analysis. Identify strengths, weakest areas, and 3 top priority actions to improve the overall score. Be specific and motivating. Reference their advanced tools like learning and simulations if active.'}`;
 
         const { text, error } = await callGemini(ctx, SYSTEM_PROMPTS.global);
 

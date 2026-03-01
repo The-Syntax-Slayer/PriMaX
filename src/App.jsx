@@ -25,6 +25,18 @@ import AIAssistant from './pages/app/AIAssistant';
 import Settings from './pages/app/Settings';
 import Onboarding from './pages/app/Onboarding';
 
+// Tier 2: Advanced Systems (Stubs)
+import GoalPlanning from './pages/app/GoalPlanning';
+import Learning from './pages/app/Learning';
+import LifeAdmin from './pages/app/LifeAdmin';
+import Social from './pages/app/Social';
+
+// Tier 3: Futuristic Systems (Stubs)
+import StrategyEngine from './pages/app/StrategyEngine';
+import LifeSimulator from './pages/app/LifeSimulator';
+import TimeAnalytics from './pages/app/TimeAnalytics';
+import RiskRadar from './pages/app/RiskRadar';
+
 import './index.css';
 import './app.css';
 
@@ -64,6 +76,18 @@ export default function App() {
               <Route path="analytics" element={<Analytics />} />
               <Route path="ai" element={<AIAssistant />} />
               <Route path="settings" element={<Settings />} />
+
+              {/* Tier 2 */}
+              <Route path="goals" element={<GoalPlanning />} />
+              <Route path="learning" element={<Learning />} />
+              <Route path="admin" element={<LifeAdmin />} />
+              <Route path="social" element={<Social />} />
+
+              {/* Tier 3 */}
+              <Route path="strategy" element={<StrategyEngine />} />
+              <Route path="simulator" element={<LifeSimulator />} />
+              <Route path="time-analytics" element={<TimeAnalytics />} />
+              <Route path="risk-radar" element={<RiskRadar />} />
             </Route>
 
             {/* Catch-all */}

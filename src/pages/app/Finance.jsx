@@ -4,6 +4,8 @@ import { FiDollarSign, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiX, FiTrendingUp, 
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, SYSTEM_PROMPTS } from '../../lib/aiService';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
+import { useCallback } from 'react';
 
 const Spinner = () => (
     <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }} style={{ display: 'inline-flex', color: '#7c3aed' }}>
@@ -183,10 +185,13 @@ function Transactions({ userId }) {
     const [adding, setAdding] = useState(false);
     const [form, setForm] = useState({ description: '', amount: '', type: 'expense', category: 'Other', date: new Date().toISOString().split('T')[0] });
 
-    useEffect(() => {
+    const fetchTxs = useCallback(() => {
         supabase.from('transactions').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(50)
             .then(({ data }) => { setTxs(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchTxs(); }, [fetchTxs]);
+    useRealtimeRefresh('transactions', userId, fetchTxs);
 
     const addTx = async () => {
         if (!form.description.trim() || !form.amount) return;
@@ -304,7 +309,7 @@ function Budgets({ userId }) {
     const [adding, setAdding] = useState(false);
     const [form, setForm] = useState({ category: 'Food & Drink', limit_amount: '' });
 
-    useEffect(() => {
+    const fetchBudgets = useCallback(() => {
         (async () => {
             const now = new Date(); const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
             const [bRes, tRes] = await Promise.all([
@@ -316,6 +321,10 @@ function Budgets({ userId }) {
             setBudgets(bRes.data || []); setSpending(sp); setLoading(false);
         })();
     }, [userId]);
+
+    useEffect(() => { fetchBudgets(); }, [fetchBudgets]);
+    useRealtimeRefresh('budgets', userId, fetchBudgets);
+    useRealtimeRefresh('transactions', userId, fetchBudgets);
 
     const addBudget = async () => {
         if (!form.limit_amount) return;
@@ -410,10 +419,13 @@ function SavingsGoals({ userId }) {
     const [form, setForm] = useState({ name: '', target_amount: '', current_amount: '0', icon: '🎯', target_date: '' });
     const ICONS = ['🎯', '🏠', '✈️', '💻', '🎓', '🚗', '💍', '🏋️', '📱', '🎸'];
 
-    useEffect(() => {
+    const fetchGoals = useCallback(() => {
         supabase.from('savings_goals').select('*').eq('user_id', userId).order('created_at')
             .then(({ data }) => { setGoals(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchGoals(); }, [fetchGoals]);
+    useRealtimeRefresh('savings_goals', userId, fetchGoals);
 
     const addGoal = async () => {
         if (!form.name.trim() || !form.target_amount) return;
@@ -605,10 +617,13 @@ function Subscriptions({ userId }) {
     const [adding, setAdding] = useState(false);
     const [form, setForm] = useState({ name: '', amount: '', billing_cycle: 'monthly', category: 'Other', next_billing: new Date().toISOString().split('T')[0] });
 
-    useEffect(() => {
+    const fetchSubs = useCallback(() => {
         supabase.from('subscriptions').select('*').eq('user_id', userId).order('next_billing')
             .then(({ data }) => { setSubs(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchSubs(); }, [fetchSubs]);
+    useRealtimeRefresh('subscriptions', userId, fetchSubs);
 
     const addSub = async () => {
         if (!form.name.trim() || !form.amount) return;

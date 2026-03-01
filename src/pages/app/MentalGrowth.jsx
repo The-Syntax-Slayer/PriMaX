@@ -4,6 +4,8 @@ import { FiSun, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiX, FiEdit3, FiSave } fro
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, SYSTEM_PROMPTS } from '../../lib/aiService';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
+import { useCallback } from 'react';
 
 const Spinner = () => <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }} style={{ display: 'inline-flex' }}><FiRotateCcw size={13} /></motion.div>;
 const Card = ({ children, style = {} }) => <div style={{ borderRadius: 16, background: 'var(--app-surface)', border: '1px solid var(--app-border)', padding: 20, ...style }}>{children}</div>;
@@ -51,7 +53,7 @@ export default function MentalGrowth() {
 function MentalOverview({ userId }) {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
+    const fetchOverview = useCallback(() => {
         (async () => {
             const [jRes, mRes, gRes] = await Promise.all([
                 supabase.from('journal_entries').select('id,title,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(3),
@@ -76,6 +78,11 @@ function MentalOverview({ userId }) {
             setLoading(false);
         })();
     }, [userId]);
+
+    useEffect(() => { fetchOverview(); }, [fetchOverview]);
+    useRealtimeRefresh('journal_entries', userId, fetchOverview);
+    useRealtimeRefresh('mood_logs', userId, fetchOverview);
+    useRealtimeRefresh('gratitude_entries', userId, fetchOverview);
     if (loading) return <div style={{ textAlign: 'center', padding: 40 }}><Spinner /></div>;
     if (!data.journals.length && !data.recentMoods.length && !data.gratitudeCount) return (
         <div style={{ textAlign: 'center', padding: '60px 20px', opacity: 0.7 }}>
@@ -193,10 +200,13 @@ function JournalTab({ userId }) {
     const [selected, setSelected] = useState(null);
     const [writing, setWriting] = useState(false);
     const [form, setForm] = useState({ title: '', content: '' });
-    useEffect(() => {
+    const fetchEntries = useCallback(() => {
         supabase.from('journal_entries').select('*').eq('user_id', userId).order('created_at', { ascending: false })
             .then(({ data }) => { setEntries(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchEntries(); }, [fetchEntries]);
+    useRealtimeRefresh('journal_entries', userId, fetchEntries);
     const save = async () => {
         if (!form.content.trim()) return;
         const { data, error } = await supabase.from('journal_entries').insert({ user_id: userId, title: form.title, content: form.content }).select().single();
@@ -262,10 +272,13 @@ function MoodTab({ userId }) {
     const [selectedMood, setSelectedMood] = useState(null);
     const [note, setNote] = useState('');
     const [saving, setSaving] = useState(false);
-    useEffect(() => {
+    const fetchLogs = useCallback(() => {
         supabase.from('mood_logs').select('*').eq('user_id', userId).order('logged_at', { ascending: false }).limit(30)
             .then(({ data }) => { setLogs(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchLogs(); }, [fetchLogs]);
+    useRealtimeRefresh('mood_logs', userId, fetchLogs);
     const logMood = async () => {
         if (!selectedMood) return;
         setSaving(true);
@@ -325,10 +338,13 @@ function GratitudeTab({ userId }) {
     const [loading, setLoading] = useState(true);
     const [items, setItems] = useState(['', '', '']);
     const [saving, setSaving] = useState(false);
-    useEffect(() => {
+    const fetchGratitude = useCallback(() => {
         supabase.from('gratitude_entries').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(20)
             .then(({ data }) => { setEntries(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchGratitude(); }, [fetchGratitude]);
+    useRealtimeRefresh('gratitude_entries', userId, fetchGratitude);
     const save = async () => {
         const filled = items.filter(i => i.trim());
         if (!filled.length) return;

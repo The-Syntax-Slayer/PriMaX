@@ -1,26 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    FiGrid, FiZap, FiBriefcase, FiDollarSign,
-    FiHeart, FiSun, FiBarChart2, FiMessageCircle,
-    FiSettings, FiChevronLeft, FiChevronRight,
-    FiBell, FiLogOut, FiUser, FiSearch, FiCommand, FiCheck
-} from 'react-icons/fi';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import ParticleCanvas from '../ParticleCanvas';
 import '../../App.css';
+import {
+    FiGrid, FiZap, FiBriefcase, FiDollarSign,
+    FiHeart, FiSun, FiBarChart2, FiMessageCircle,
+    FiChevronLeft, FiChevronRight, FiBell, FiCheck,
+    FiTarget, FiBookOpen, FiFileText, FiUsers,
+    FiCompass, FiCpu, FiClock, FiAlertTriangle
+} from 'react-icons/fi';
 
 const navSections = [
     {
-        label: 'Overview',
+        label: 'Global Intelligence',
         items: [
             { to: '/app/dashboard', icon: <FiGrid />, label: 'Command Center', exact: true },
+            { to: '/app/analytics', icon: <FiBarChart2 />, label: 'Analytics', color: '#7c3aed' },
+            { to: '/app/ai', icon: <FiMessageCircle />, label: 'AI Agent', color: '#00e5ff' },
         ],
     },
     {
-        label: 'Growth Modules',
+        label: 'Tier 1: Core Systems',
         items: [
             { to: '/app/productivity', icon: <FiZap />, label: 'Productivity', color: '#00e5ff' },
             { to: '/app/career', icon: <FiBriefcase />, label: 'Career', color: '#fbbf24' },
@@ -30,10 +33,21 @@ const navSections = [
         ],
     },
     {
-        label: 'Intelligence',
+        label: 'Tier 2: Advanced Systems',
         items: [
-            { to: '/app/analytics', icon: <FiBarChart2 />, label: 'Analytics', color: '#7c3aed' },
-            { to: '/app/ai', icon: <FiMessageCircle />, label: 'AI Assistant', color: '#00e5ff' },
+            { to: '/app/goals', icon: <FiTarget />, label: 'Goal Planning', color: '#ef4444' },
+            { to: '/app/learning', icon: <FiBookOpen />, label: 'Learning', color: '#3b82f6' },
+            { to: '/app/admin', icon: <FiFileText />, label: 'Life Admin', color: '#8b5cf6' },
+            { to: '/app/social', icon: <FiUsers />, label: 'Social', color: '#ec4899' },
+        ],
+    },
+    {
+        label: 'Tier 3: Futuristic Systems',
+        items: [
+            { to: '/app/strategy', icon: <FiCompass />, label: 'Strategy Engine', color: '#0ea5e9' },
+            { to: '/app/simulator', icon: <FiCpu />, label: 'Life Simulator', color: '#a855f7' },
+            { to: '/app/time-analytics', icon: <FiClock />, label: 'Time Analytics', color: '#f59e0b' },
+            { to: '/app/risk-radar', icon: <FiAlertTriangle />, label: 'Risk Radar', color: '#ef4444' },
         ],
     },
 ];

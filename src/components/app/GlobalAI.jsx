@@ -165,12 +165,37 @@ export default function GlobalAI() {
                 }
             },
             {
+                name: "create_goal",
+                description: "Create a new savings goal in the Finance module.",
+                parameters: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        name: { type: SchemaType.STRING, description: "Goal name (e.g. New Car)" },
+                        target_amount: { type: SchemaType.NUMBER, description: "Amount needed" }
+                    },
+                    required: ["name", "target_amount"]
+                }
+            },
+            {
+                name: "add_learning_item",
+                description: "Add a skill or topic to the Learning module.",
+                parameters: {
+                    type: SchemaType.OBJECT,
+                    properties: {
+                        title: { type: SchemaType.STRING, description: "Name of the skill (e.g. React.js)" },
+                        category: { type: SchemaType.STRING, description: "Category (e.g. Development, Language)" },
+                        priority: { type: SchemaType.STRING, description: "Priority level (High, Medium, Low)" }
+                    },
+                    required: ["title", "category"]
+                }
+            },
+            {
                 name: "get_data",
                 description: "Fetch all user data from a specific module. Use this to read the user's current items (e.g. read their tasks).",
                 parameters: {
                     type: SchemaType.OBJECT,
                     properties: {
-                        table_name: { type: SchemaType.STRING, description: "One of: tasks, transactions, workouts, journal_entries, mood_logs, job_applications" }
+                        table_name: { type: SchemaType.STRING, description: "One of: tasks, habits, goals, transactions, workouts, journal_entries, mood_logs, job_applications, learning_items, life_admin, social_contacts, decisions, simulations, time_logs, risks" }
                     },
                     required: ["table_name"]
                 }
@@ -181,7 +206,7 @@ export default function GlobalAI() {
                 parameters: {
                     type: SchemaType.OBJECT,
                     properties: {
-                        table_name: { type: SchemaType.STRING, description: "One of: tasks, transactions, workouts, journal_entries, mood_logs, job_applications" }
+                        table_name: { type: SchemaType.STRING, description: "One of: tasks, habits, goals, transactions, workouts, journal_entries, mood_logs, job_applications, learning_items, life_admin, social_contacts, decisions, simulations, time_logs, risks" }
                     },
                     required: ["table_name"]
                 }
@@ -294,7 +319,10 @@ Do not use markdown bolding (**) in your responses. Be concise and confirm actio
         { cmd: '/workout', desc: 'Log a workout', example: '/workout 30m of running' },
         { cmd: '/journal', desc: 'Add a journal entry', example: '/journal Feeling great today because...' },
         { cmd: '/mood', desc: 'Log your mood', example: '/mood Great' },
-        { cmd: '/job', desc: 'Track a job application', example: '/job Applied to Google for SWE role' }
+        { cmd: '/job', desc: 'Track a job application', example: '/job Applied to Google for SWE role' },
+        { cmd: '/goal', desc: 'Create a savings goal', example: '/goal Save $5000 for a car' },
+        { cmd: '/learn', desc: 'Add a learning topic', example: '/learn Start learning Python' },
+        { cmd: '/update', desc: 'Update any item', example: '/update my task "Buy groceries" to completed' }
     ];
 
     const handleCommandClick = (cmdItem) => {
@@ -368,6 +396,26 @@ Do not use markdown bolding (**) in your responses. Be concise and confirm actio
                     if (error) throw error;
                     actionResult = { success: true, message: `Application to '${company}' logged.` };
                     actionMsg = `Added Job Application: ${company} - ${job_role}`;
+                    break;
+                }
+                case 'create_goal': {
+                    const { name, target_amount } = call.args;
+                    const { error } = await supabase.from('goals').insert({
+                        user_id: user.id, name, target_amount, current_amount: 0
+                    });
+                    if (error) throw error;
+                    actionResult = { success: true, message: `Goal '${name}' created for $${target_amount}.` };
+                    actionMsg = `Created Goal: ${name.substring(0, 20)}`;
+                    break;
+                }
+                case 'add_learning_item': {
+                    const { title, category, priority } = call.args;
+                    const { error } = await supabase.from('learning_items').insert({
+                        user_id: user.id, title, category, priority: priority || 'Medium', status: 'Not Started', progress: 0
+                    });
+                    if (error) throw error;
+                    actionResult = { success: true, message: `Learning item '${title}' added.` };
+                    actionMsg = `Added to Learning: ${title.substring(0, 20)}`;
                     break;
                 }
                 case 'get_data': {

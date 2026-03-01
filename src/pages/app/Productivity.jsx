@@ -4,6 +4,7 @@ import { FiCheckSquare, FiPlus, FiTrash2, FiZap, FiRotateCcw, FiTarget, FiX, FiC
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { callGemini, SYSTEM_PROMPTS } from '../../lib/aiService';
+import { useRealtimeRefresh } from '../../hooks/useRealtimeRefresh';
 
 const COLS = [
     { id: 'todo', label: 'To Do', color: '#5a5a80', bg: 'rgba(90,90,128,0.08)' },
@@ -73,10 +74,13 @@ function KanbanBoard({ userId }) {
     const [editingId, setEditingId] = useState(null);
     const [editValue, setEditValue] = useState('');
 
-    useEffect(() => {
+    const fetchTasks = useCallback(() => {
         supabase.from('tasks').select('*').eq('user_id', userId).order('created_at', { ascending: false })
             .then(({ data }) => { setTasks(data || []); setLoading(false); });
     }, [userId]);
+
+    useEffect(() => { fetchTasks(); }, [fetchTasks]);
+    useRealtimeRefresh('tasks', userId, fetchTasks);
 
     const addTask = async () => {
         if (!form.title.trim()) return;
@@ -371,10 +375,13 @@ export function HabitTracker({ userId, module = 'productivity' }) {
     const [newHabit, setNewHabit] = useState('');
     const today = new Date().toISOString().split('T')[0];
 
-    useEffect(() => {
+    const fetchHabits = useCallback(() => {
         supabase.from('habits').select('*').eq('user_id', userId).eq('module', module).order('created_at')
             .then(({ data }) => { setHabits(data || []); setLoading(false); });
     }, [userId, module]);
+
+    useEffect(() => { fetchHabits(); }, [fetchHabits]);
+    useRealtimeRefresh('habits', userId, fetchHabits);
 
     const addHabit = async () => {
         if (!newHabit.trim()) return;
